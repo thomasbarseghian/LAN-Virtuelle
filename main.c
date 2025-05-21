@@ -1,4 +1,5 @@
 #include "reseau.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -14,6 +15,9 @@ int main()
     char myString[100];
     while (fgets(myString, 100, fptr))
     {
-        printf("%s", myString);
+        if (myString[0] == '2')
+        {
+            convertMacToHexa(myString);
+        }
     }
 }

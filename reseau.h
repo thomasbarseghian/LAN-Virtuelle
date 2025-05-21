@@ -18,15 +18,9 @@ typedef enum
     NON_DESIGNATED
 } TypePort;
 
-typedef struct
-{
-    uint64_t mac;
-} AdresseMAC;
+typedef uint64_t AdresseMAC;
 
-typedef struct
-{
-    uint32_t ip;
-} AdresseIP;
+typedef uint32_t AdresseIP;
 
 // Station
 typedef struct
@@ -59,5 +53,6 @@ typedef struct
 // Function declarations
 void afficherMAC(AdresseMAC mac);
 void afficherIP(AdresseIP ip);
+void convertMacToHexa(char *str);
 
 #endif
