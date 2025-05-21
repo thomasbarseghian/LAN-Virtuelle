@@ -1,0 +1,44 @@
+# === Build artifacts ===
+*.o
+*.out
+*.a
+*.so
+*.exe
+*.obj
+*.dll
+
+# === Executables ===
+main
+test
+run
+
+# === Makefile generated artifacts ===
+*.dSYM/
+*.d
+*.dep
+*.map
+
+# === Editor & OS files ===
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+
+# === Backup files ===
+*.bak
+*.tmp
+
+# === CMake (if used) ===
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# === Custom build dirs ===
+build/
+bin/
+obj/
