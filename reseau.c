@@ -10,7 +10,7 @@ void convertMacToHexa(char *str)
     if (str[0] != '2')
         return;
 
-    for (int i = 0; i < strlen(str); i++)
+    for (size_t i = 0; i < strlen(str); i++)
     {
         printf("%c", str[i]);
     }
