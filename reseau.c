@@ -5,13 +5,15 @@
 
 void afficherIP(AdresseIP ip);
 
-void convertMacToHexa(char *str)
+uint64_t convertMacToHexa(char *str)
 {
+    uint64_t hexaMac = 0;
     if (str[0] != '2')
-        return;
+        return hexaMac;
 
-    for (size_t i = 0; i < strlen(str); i++)
+    for (size_t i = 2; i < 19; i++)
     {
         printf("%c", str[i]);
     }
+    return hexaMac;
 }

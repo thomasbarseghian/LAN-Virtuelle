@@ -53,6 +53,6 @@ typedef struct
 // Function declarations
 void afficherMAC(AdresseMAC mac);
 void afficherIP(AdresseIP ip);
-void convertMacToHexa(char *str);
+uint64_t convertMacToHexa(char *str);
 
 #endif
