@@ -15,9 +15,9 @@ int main()
     char myString[100];
     while (fgets(myString, 100, fptr))
     {
-        if (myString[0] == '2')
+        if (myString[0] == '1')
         {
-            convertMacToHexa(myString);
+            convertIpToInterger(myString);
         }
     }
 }
