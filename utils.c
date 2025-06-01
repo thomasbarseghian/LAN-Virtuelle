@@ -13,9 +13,17 @@ void afficherMacHexa(const char *str)
 
 void afficherSwitch(Switch sw)
 {
+    printf("========= Switch =========\n");
     printf("Adresse Mac : %lu\n", sw.mac);
     printf("Nombre de ports : %ld\n", sw.nbPorts);
     printf("Priorité : %ld\n", sw.priorite);
+}
+
+void afficherSation(Station s)
+{
+    printf("========= Station =========\n");
+    printf("Adresse Mac : %lu\n", s.mac);
+    printf("Adresse ip : %s\n", s.ip);
 }
 
 // Convertit un caractère hexadécimal ('0'-'9', 'a'-'f', 'A'-'F') en entier
@@ -119,7 +127,55 @@ int verifyMac(const char *mac)
     return EXIT_SUCCESS;
 }
 
-void ajoutEquipement(Graphe *reseau, Equipement e)
+void ajoutEquipement(Graphe *reseau, Equipement *e, int index)
 {
-    reseau->equipements[reseau->nb_equipements++] = e;
+    reseau->equipements[index] = *e;
+}
+
+int verifyIp(char *ip)
+{
+    if (ip == NULL)
+        return EXIT_FAILURE;
+    char *partie = strtok(ip, ".");
+    int i = 0;
+    while (partie != NULL)
+    {
+        if (partieIPEstValide(partie))
+            return EXIT_FAILURE;
+        i++;
+        partie = strtok(NULL, ".");
+    }
+    if (i < 3)
+        return EXIT_FAILURE; // IP n'est pas bonne
+    return EXIT_SUCCESS;
+}
+
+int partieIPEstValide(char *partie)
+{
+    int len = strlen(partie);
+    if (len == 0 || (len > 3 && partie[3] != '\n'))
+    {
+        return EXIT_FAILURE;
+    }
+
+    if (len > 0 && partie[0] == '0')
+        return EXIT_FAILURE;
+    int valid8bits = 0;
+    while (*partie != '\n' && *partie != '\0')
+    {
+        if (*partie >= '0' && *partie <= '9')
+        {
+            valid8bits = valid8bits * 10 + (*partie - '0');
+        }
+        else
+        {
+            return EXIT_FAILURE;
+        }
+        partie++;
+    }
+    if (valid8bits < 0 || valid8bits > 255)
+    {
+        return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
 }

@@ -83,13 +83,21 @@ typedef struct
 // Function declarations
 void afficherIP(AdresseIP ip);
 void afficherMacHexa(const char *str);
+void afficherSwitch(Switch sw);
+void afficherSation(Station s);
 int hexCharToInt(char c);
 uint64_t convertMacToInteger(const char *str, uint64_t *mac);
 
-int creeReseau(const char *filePath);
+int creeReseau(const char *filePath, Graphe *reseau);
 int extraireNbEquipementsEtAretes(int *nbEquipements, int *nbAretes, char *ligne);
 int estInteger(char *str, int *temp);
-void afficherSwitch(Switch sw);
 int verifyMac(const char *mac);
-void ajoutEquipement(Graphe *reseau, Equipement e);
+void ajoutEquipement(Graphe *reseau, Equipement *e, int index);
+int verifyIp(char *ip);
+int partieIPEstValide(char *partie);
+FILE *ouvrirFichier(const char *filePath);
+int lireNbEquipementsEtAretes(FILE *fptr, int *nbEquipements, int *nbAretes);
+int initialiserReseau(Graphe *reseau, int nbEquipements, int nbAretes);
+int creerEquipements(FILE *fptr, Graphe *reseau, int nbEquipements);
+int verifieNbEquipementEtAretes(FILE *fptr, int nbEquipements, int nbAretes);
 #endif

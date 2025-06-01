@@ -2,122 +2,195 @@
 
 // Fonction pour crée réseau à partie de fichier de configration
 // Cette fonction prend path de fichier que utilisateur va donner quand il execute le program
-// example: /main ./reseaux.txt
-int creeReseau(const char *filePath)
+// example: /main ./mylan.lan.txt
+int creeReseau(const char *filePath, Graphe *reseau)
 {
-    FILE *fptr;
-    // Ouvrir un fichier en mode lecture
-    fptr = fopen(filePath, "r");
+    // ====================
+    // Étape 0 : Ouverture du fichier en mode lecture
+    // ====================
+    FILE *fptr = ouvrirFichier(filePath);
+    if (fptr == NULL)
+        return EXIT_FAILURE;
+
+    // ====================
+    // Étape 1 : Lecture du nombre d'équipements et d'arêtes
+    // ====================
+    int nbEquipements = 0, nbAretes = 0;
+    if (lireNbEquipementsEtAretes(fptr, &nbEquipements, &nbAretes) != EXIT_SUCCESS)
+        return EXIT_FAILURE;
+    // ====================
+    // Étape 2 : Verifie que nombre de eqiupements et arêtes sont bonne
+    // ====================
+    if (verifieNbEquipementEtAretes(fptr, nbEquipements, nbAretes) != EXIT_SUCCESS)
+        return EXIT_FAILURE;
+    // ====================
+    // Étape 3 : Allocation mémoire pour le graphe
+    // ====================
+    if (initialiserReseau(reseau, nbEquipements, nbAretes) != EXIT_SUCCESS)
+        return EXIT_FAILURE;
+    // ====================
+    // Étape 4 : Lecture des équipements
+    // ====================
+    if (creerEquipements(fptr, reseau, nbEquipements) != EXIT_SUCCESS)
+        return EXIT_FAILURE;
+    fclose(fptr);
+    return EXIT_SUCCESS;
+}
+
+FILE *ouvrirFichier(const char *filePath)
+{
+    FILE *fptr = fopen(filePath, "r");
     if (fptr == NULL)
     {
         printf("Erreur lors de l'ouverture du fichier/ fichier n'existe pas.\n");
-        return EXIT_FAILURE;
     }
-
-    // Nous lisons le fichier ligne par ligne
-
-    int nbEquipements = -1;
-    int nbAretes = -1;
+    return fptr;
+}
+int lireNbEquipementsEtAretes(FILE *fptr, int *nbEquipements, int *nbAretes)
+{
     char ligne[256];
+    if (fgets(ligne, 256, fptr) == NULL)
+        return EXIT_FAILURE;
 
-    // Premieur Ligne
-    fgets(ligne, 256, fptr);
-    if (extraireNbEquipementsEtAretes(&nbEquipements, &nbAretes, ligne) == 1)
+    if (extraireNbEquipementsEtAretes(nbEquipements, nbAretes, ligne) == 1)
     {
         printf("Erreur dans fichier de configuration.\n");
         return EXIT_FAILURE;
     }
+    return EXIT_SUCCESS;
+}
+int verifieNbEquipementEtAretes(FILE *fptr, int nbEquipements, int nbAretes)
+{
+    int totalAttendu = nbEquipements + nbAretes + 1; // +1 for the header line
+    int totalLignes = 0;
+    char ligne[256];
 
-    // Crée Graph
-    Graphe reseau;
-    reseau.nb_equipements = nbEquipements;
-    reseau.nb_aretes = nbAretes;
-    reseau.equipements = malloc(sizeof(Equipement) * nbEquipements);
-    if (reseau.equipements == NULL)
+    // Rembobiner pour démarrer depuis le début du fichier
+    rewind(fptr);
+
+    while (fgets(ligne, sizeof(ligne), fptr) != NULL)
     {
-        printf("Erreur d'allocation de mémoire");
-        return EXIT_FAILURE;
-    }
-    reseau.aretes = malloc(sizeof(Arete) * nbAretes);
-    if (reseau.aretes == NULL)
-    {
-        printf("Erreur d'allocation de mémoire");
-        return EXIT_FAILURE;
+        totalLignes++;
     }
 
-    // Creation des Equipements
+    if (totalLignes != totalAttendu)
+    {
+        printf("Erreur : Le fichier contient %d lignes, mais %d étaient attendues.\n", totalLignes, totalAttendu);
+        return EXIT_FAILURE;
+    }
+
+    // Revenir à la deuxième ligne
+    rewind(fptr);
+    fgets(ligne, sizeof(ligne), fptr); // sauter la première ligne
+    return EXIT_SUCCESS;
+}
+int initialiserReseau(Graphe *reseau, int nbEquipements, int nbAretes)
+{
+    reseau->nb_equipements = nbEquipements;
+    reseau->nb_aretes = nbAretes;
+
+    reseau->equipements = malloc(sizeof(Equipement) * nbEquipements);
+    if (reseau->equipements == NULL)
+    {
+        printf("Erreur d'allocation de mémoire\n");
+        return EXIT_FAILURE;
+    }
+
+    reseau->aretes = malloc(sizeof(Arete) * nbAretes);
+    if (reseau->aretes == NULL)
+    {
+        printf("Erreur d'allocation de mémoire\n");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+int creerEquipements(FILE *fptr, Graphe *reseau, int nbEquipements)
+{
+    char ligne[256];
+
     for (int i = 0; i < nbEquipements; i++)
     {
-        fgets(ligne, 256, fptr);
+        if (fgets(ligne, 256, fptr) == NULL)
+            return EXIT_FAILURE;
 
-        char *parties[4]; // il y a 4 partie different au max
-
+        char *parties[4];
         int j = 0;
         char *partie = strtok(ligne, ";");
         while (partie != NULL && j < 4)
         {
             parties[j++] = partie;
-            partie = strtok(NULL, ";"); // prochain partie
+            partie = strtok(NULL, ";");
         }
 
-        // valider que nous avons exactement 3 ou 4 parties
         if (j != 4 && j != 3)
         {
             printf("Erreur dans fichier de configuration.\n");
             return EXIT_FAILURE;
         }
+
         int typeMachine = 0;
         if (!estInteger(parties[0], &typeMachine) == EXIT_SUCCESS)
         {
             printf("Erreur : Type Machine invalide\n");
             return EXIT_FAILURE;
         }
+
         if (typeMachine == 2)
         {
-
-            // Creation de Switch
             Switch sw;
             if (convertMacToInteger(parties[1], &(sw.mac)))
             {
                 printf("Erreur : adresse MAC invalide\n");
                 return EXIT_FAILURE;
             }
+
             int temp = 0;
             if (estInteger(parties[3], &temp) == EXIT_SUCCESS)
-            {
                 sw.priorite = (size_t)temp;
-            }
             else
             {
                 printf("Error partie Priorite\n");
                 return EXIT_FAILURE;
             }
+
             temp = 0;
             if (estInteger(parties[2], &temp) == EXIT_SUCCESS)
-            {
                 sw.nbPorts = (size_t)temp;
-            }
             else
             {
                 printf("Error partie Ports\n");
                 return EXIT_FAILURE;
             }
+
             sw.ports = NULL;
             sw.tableCommutation = NULL;
+
             Equipement e;
             e.sw = sw;
             e.type = SWITCH_TYPE;
-            ajoutEquipement(&reseau, e);
+
+            ajoutEquipement(reseau, &e, i);
         }
         else if (typeMachine == 1)
         {
-            // Creation de Machine
             Station s;
             if (convertMacToInteger(parties[1], &(s.mac)))
             {
                 printf("Erreur : adresse MAC invalide\n");
                 return EXIT_FAILURE;
             }
+
+            if (verifyIp(parties[2]))
+            {
+                printf("Erreur : adresse IP invalide\n");
+                return EXIT_FAILURE;
+            }
+            strcpy(s.ip, parties[2]);
+            Equipement e;
+            e.station = s;
+            e.type = STATION_TYPE;
+            ajoutEquipement(reseau, &e, i);
         }
         else
         {
@@ -127,7 +200,6 @@ int creeReseau(const char *filePath)
 
     return EXIT_SUCCESS;
 }
-
 uint64_t convertMacToInteger(const char *str, uint64_t *mac)
 {
     if (verifyMac(str))
