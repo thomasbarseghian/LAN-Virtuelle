@@ -17,17 +17,22 @@ int main(int argc, char *argv[])
     if (creeReseau(argv[1], &g) == 0)
     {
         printf("Reseau cree avex succée\n");
-        // for (size_t i = 0; i < g.nb_equipements; i++)
-        // {
-        //     if (g.equipements[i].type == STATION_TYPE)
-        //     {
-        //         afficherSation(g.equipements[i].station);
-        //     }
-        //     else
-        //     {
-        //         afficherSwitch(g.equipements[i].sw);
-        //     }
-        // }
+        for (size_t i = 0; i < g.nb_equipements; i++)
+        {
+            if (g.equipements[i].type == STATION_TYPE)
+            {
+                afficherSation(g.equipements[i].station);
+            }
+            else
+            {
+                afficherSwitch(g.equipements[i].sw);
+            }
+        }
+        printf("---ARÊTES---\n");
+        for (size_t i = 0; i < g.nb_aretes; i++)
+        {
+            printf("%ld-----%ld :poids: %d\n", g.aretes[i].index_e1, g.aretes[i].index_e2, g.aretes[i].poids);
+        }
     }
     else
         printf("Error dans fichier\n");

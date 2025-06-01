@@ -93,6 +93,7 @@ int extraireNbEquipementsEtAretes(int *nbEquipements, int *nbAretes, char *ligne
 int estInteger(char *str, int *temp);
 int verifyMac(const char *mac);
 void ajoutEquipement(Graphe *reseau, Equipement *e, int index);
+void ajoutArete(Graphe *reseau, Arete *a, int index);
 int verifyIp(char *ip);
 int partieIPEstValide(char *partie);
 FILE *ouvrirFichier(const char *filePath);
@@ -100,4 +101,5 @@ int lireNbEquipementsEtAretes(FILE *fptr, int *nbEquipements, int *nbAretes);
 int initialiserReseau(Graphe *reseau, int nbEquipements, int nbAretes);
 int creerEquipements(FILE *fptr, Graphe *reseau, int nbEquipements);
 int verifieNbEquipementEtAretes(FILE *fptr, int nbEquipements, int nbAretes);
+int creerArrets(FILE *fptr, Graphe *reseau, int nbAretes);
 #endif

@@ -131,6 +131,10 @@ void ajoutEquipement(Graphe *reseau, Equipement *e, int index)
 {
     reseau->equipements[index] = *e;
 }
+void ajoutArete(Graphe *reseau, Arete *a, int index)
+{
+    reseau->aretes[index] = *a;
+}
 
 int verifyIp(char *ip)
 {

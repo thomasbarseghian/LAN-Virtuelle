@@ -33,6 +33,11 @@ int creeReseau(const char *filePath, Graphe *reseau)
     // ====================
     if (creerEquipements(fptr, reseau, nbEquipements) != EXIT_SUCCESS)
         return EXIT_FAILURE;
+    // ====================
+    // Étape 5 : Lecture des Aretes
+    // ====================
+    if (creerArrets(fptr, reseau, nbAretes) != EXIT_SUCCESS)
+        return EXIT_FAILURE;
     fclose(fptr);
     return EXIT_SUCCESS;
 }
@@ -200,6 +205,59 @@ int creerEquipements(FILE *fptr, Graphe *reseau, int nbEquipements)
 
     return EXIT_SUCCESS;
 }
+int creerArrets(FILE *fptr, Graphe *reseau, int nbAretes)
+{
+    char ligne[256];
+
+    for (int i = 0; i < nbAretes; i++)
+    {
+        if (fgets(ligne, 256, fptr) == NULL)
+            return EXIT_FAILURE;
+
+        char *parties[3];
+        int j = 0;
+        char *partie = strtok(ligne, ";");
+        while (partie != NULL)
+        {
+            parties[j++] = partie;
+            partie = strtok(NULL, ";");
+        }
+        if (j != 3)
+        {
+            printf("Erreur dans fichier de configuration. :: Aretes entre equipements :: Format n'est pas bonne \n");
+            return EXIT_FAILURE;
+        }
+        int indexEquipment1, indexEquipment2, poidsArete;
+        if (estInteger(parties[0], &indexEquipment1) != EXIT_SUCCESS)
+        {
+            printf("Erreur dans fichier de configuration. :: Aretes entre equipements :: Format de 1er equipment n'est pas bonne \n");
+            return EXIT_FAILURE;
+        }
+        if (estInteger(parties[1], &indexEquipment2) != EXIT_SUCCESS)
+        {
+            printf("Erreur dans fichier de configuration. :: Aretes entre equipements :: Format de 2eme equipment n'est pas bonne  \n");
+            return EXIT_FAILURE;
+        }
+        if (estInteger(parties[2], &poidsArete) != EXIT_SUCCESS)
+        {
+            printf("Erreur dans fichier de configuration. :: Aretes entre equipements :: Format de poids entre equipment n'est pas bonne  \n");
+            return EXIT_FAILURE;
+        }
+        if ((indexEquipment1 < 0 || (size_t)indexEquipment1 > reseau->nb_equipements) ||
+            (indexEquipment2 < 0 || (size_t)indexEquipment2 > reseau->nb_equipements))
+        {
+            printf("Erreur dans fichier de configuration. :: Aretes entre equipements :: Equipements n'existe pas! \n");
+            return EXIT_FAILURE;
+        }
+        Arete a;
+        a.index_e1 = indexEquipment1;
+        a.index_e2 = indexEquipment2;
+        a.poids = (uint8_t)poidsArete;
+        ajoutArete(reseau, &a, i);
+    }
+    return EXIT_SUCCESS;
+}
+
 uint64_t convertMacToInteger(const char *str, uint64_t *mac)
 {
     if (verifyMac(str))
