@@ -149,7 +149,6 @@ int creerEquipements(FILE *fptr, Graphe *reseau, int nbEquipements)
                 printf("Erreur : adresse MAC invalide\n");
                 return EXIT_FAILURE;
             }
-
             int temp = 0;
             if (estInteger(parties[3], &temp) == EXIT_SUCCESS)
                 sw.priorite = (size_t)temp;
@@ -285,6 +284,20 @@ uint64_t convertMacToInteger(const char *str, uint64_t *mac)
     {
         printf("Erreur : caractères invalides après adresse MAC\n");
         return EXIT_FAILURE;
+    }
+    return EXIT_SUCCESS;
+}
+
+int mettreJourTableCommutation(Graphe g)
+{
+    int nbSwitches = nbSwitchReusax(g);
+    printf("nbSwitches %d : \n", nbSwitches);
+    for (size_t i = 0; i < g.nb_equipements; i++)
+    {
+        if (g.equipements[i].type == SWITCH_TYPE)
+        {
+            afficherSwitch(g.equipements[i].sw);
+        }
     }
     return EXIT_SUCCESS;
 }

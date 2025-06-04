@@ -5,10 +5,27 @@ void afficherIP(AdresseIP ip)
     printf("Adresse IP: %s \n", ip);
 }
 
-void afficherMacHexa(const char *str)
+void afficherMacHexa(uint64_t mac)
 {
-    uint64_t mac;
-    printf("Mac  Hexa Adresse : %lx\n", convertMacToInteger(str, &mac));
+    printf("Adresse MAC en Hexa: %#lx\n", mac);
+}
+
+void afficherMAC(uint64_t mac)
+{
+    uint8_t bytes[6];
+    char *buffer = malloc(sizeof(char) * 18);
+
+    for (int i = 0; i < 6; i++)
+    {
+        bytes[5 - i] = (mac >> (i * 8)) & 0xFF;
+    }
+
+    sprintf(buffer, "%02X:%02X:%02X:%02X:%02X:%02X",
+            bytes[0], bytes[1], bytes[2],
+            bytes[3], bytes[4], bytes[5]);
+
+    printf("%s \n", buffer);
+    free(buffer);
 }
 
 void afficherSwitch(Switch sw)
@@ -131,6 +148,7 @@ void ajoutEquipement(Graphe *reseau, Equipement *e, int index)
 {
     reseau->equipements[index] = *e;
 }
+
 void ajoutArete(Graphe *reseau, Arete *a, int index)
 {
     reseau->aretes[index] = *a;
@@ -182,4 +200,96 @@ int partieIPEstValide(char *partie)
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
+}
+
+int nbSwitchReusax(Graphe g)
+{
+    int nbSwitches = 0;
+    for (size_t i = 0; i < g.nb_equipements; i++)
+    {
+        if (g.equipements[i].type == SWITCH_TYPE)
+        {
+            nbSwitches++;
+        }
+    }
+    return nbSwitches;
+}
+int nbStationReusax(Graphe g)
+{
+    int nbSwitches = 0;
+    for (size_t i = 0; i < g.nb_equipements; i++)
+    {
+        if (g.equipements[i].type == STATION_TYPE)
+        {
+            nbSwitches++;
+        }
+    }
+    return nbSwitches;
+}
+
+void afficherTrameUtilisateur(EthernetTram *trame)
+{
+    printf("----- Trame Ethernet (mode utilisateur) -----\n");
+    printf("Adresse MAC Source      : ");
+    afficherMAC(trame->Dest);
+    printf("Adresse MAC Destination : ");
+    afficherMAC(trame->Src);
+    printf("Type                    : 0x%04X\n", trame->type);
+    printf("Données                 : %s\n", trame->donnees);
+    printf("FCS                     : 0x%08X\n", trame->FCS);
+
+    printf("--------------------------------------------\n");
+}
+
+void afficherTrameHexa(EthernetTram *trame)
+{
+    printf("----- Trame Ethernet (hexadécimal brut) -----\n");
+
+    for (int i = 0; i < 7; i++)
+    {
+        printf("%02X ", trame->preambule[i]);
+    }
+    printf("%02X ", trame->SFD);
+
+    for (int i = 5; i >= 0; i--)
+    {
+        printf("%02X ", (uint8_t)(trame->Dest >> (i * 8)));
+    }
+    for (int i = 5; i >= 0; i--)
+    {
+        printf("%02X ", (uint8_t)(trame->Src >> (i * 8)));
+    }
+    printf("%02X %02X", (trame->type >> 8) & 0xFF, ((trame->type) & 0xFF));
+
+    for (size_t i = 0; trame->donnees[i] != '\0'; i++)
+        printf("%02X ", (uint8_t)trame->donnees[i]);
+    printf("%02X %02X %02X %02X\n",
+           (trame->FCS >> 24) & 0xFF,
+           (trame->FCS >> 16) & 0xFF,
+           (trame->FCS >> 8) & 0xFF,
+           trame->FCS & 0xFF);
+
+    printf("--------------------------------------------\n");
+}
+
+void affichageMachine(Graphe g)
+{
+    int j = 0;
+    printf(" Quelle station veut envoyer un message ? ");
+    for (size_t i = 0; i < g.nb_equipements; i++)
+    {
+        if (g.equipements[i].type == STATION_TYPE)
+        {
+            printf("%d - MAC : ", j);
+            afficherMAC(g.equipements[i].station.mac);
+            j++;
+        }
+    }
+}
+int validerStationInput(Graphe g)
+{
+    // À FAIRE
+    int station;
+
+    return station;
 }

@@ -8,6 +8,8 @@
 #include <math.h>
 #include <stdbool.h>
 
+#define MAX_DATA_SIZE 1500
+
 // Address structures
 typedef enum
 {
@@ -80,11 +82,27 @@ typedef struct
     size_t nb_equipements;
 } Graphe;
 
+// Trames Ethernet
+typedef struct
+{
+    uint8_t preambule[7];
+    uint8_t SFD;
+    AdresseMAC Dest;
+    AdresseMAC Src;
+    uint16_t type;
+    uint8_t donnees[MAX_DATA_SIZE];
+    uint32_t FCS;
+} EthernetTram;
+
 // Function declarations
 void afficherIP(AdresseIP ip);
-void afficherMacHexa(const char *str);
+void afficherMacHexa(uint64_t mac);
+void afficherMAC(uint64_t mac);
 void afficherSwitch(Switch sw);
 void afficherSation(Station s);
+void afficherTrameUtilisateur(EthernetTram *trame);
+void afficherTrameHexa(EthernetTram *trame);
+void affichageMachine(Graphe g);
 int hexCharToInt(char c);
 uint64_t convertMacToInteger(const char *str, uint64_t *mac);
 
@@ -102,4 +120,9 @@ int initialiserReseau(Graphe *reseau, int nbEquipements, int nbAretes);
 int creerEquipements(FILE *fptr, Graphe *reseau, int nbEquipements);
 int verifieNbEquipementEtAretes(FILE *fptr, int nbEquipements, int nbAretes);
 int creerArrets(FILE *fptr, Graphe *reseau, int nbAretes);
+int nbSwitchReusax(Graphe g);
+int nbStationReusax(Graphe g);
+int validerStationInput(Graphe g);
+int mettreJourTableCommutation(Graphe g);
+
 #endif
