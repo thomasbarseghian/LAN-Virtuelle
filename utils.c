@@ -10,7 +10,7 @@ void afficherMacHexa(uint64_t mac)
     printf("Adresse MAC en Hexa: %#lx\n", mac);
 }
 
-void afficherMAC(uint64_t mac)
+char *obtenirMACString(uint64_t mac)
 {
     uint8_t bytes[6];
     char *buffer = malloc(sizeof(char) * 18);
@@ -25,7 +25,7 @@ void afficherMAC(uint64_t mac)
             bytes[3], bytes[4], bytes[5]);
 
     printf("%s \n", buffer);
-    free(buffer);
+    return buffer;
 }
 
 void afficherSwitch(Switch sw)
@@ -231,9 +231,9 @@ void afficherTrameUtilisateur(EthernetTram *trame)
 {
     printf("----- Trame Ethernet (mode utilisateur) -----\n");
     printf("Adresse MAC Source      : ");
-    afficherMAC(trame->Dest);
+    printf("%s\n", obtenirMACString(trame->Dest));
     printf("Adresse MAC Destination : ");
-    afficherMAC(trame->Src);
+    printf("%s\n", obtenirMACString(trame->Src));
     printf("Type                    : 0x%04X\n", trame->type);
     printf("Données                 : %s\n", trame->donnees);
     printf("FCS                     : 0x%08X\n", trame->FCS);
@@ -272,24 +272,152 @@ void afficherTrameHexa(EthernetTram *trame)
     printf("--------------------------------------------\n");
 }
 
-void affichageMachine(Graphe g)
+int validerStationInput(Graphe g)
 {
+    // À FAIRE
+    int station = -1;
+    scanf("%d", &station);
+    if (station < 0 || station > nbStationReusax(g))
+    {
+        printf("Invalide input\n");
+        return EXIT_FAILURE;
+    }
+    return station;
+}
+
+// Menu
+// Désactive le mode canonique (lecture ligne par ligne) et l'affichage des touches tapées
+// Mode canonique = lecture ligne par ligne (entrée reçue après "Entrée")
+// Mode non canonique = lecture caractère par caractère (réagit tout de suite, ex: flèches)
+// On désactive ICANON pour rendre le menu interactif (navigation avec flèches)
+// On désactive aussi ECHO pour ne pas afficher les touches tapées
+void desactiverEntreeBufferisee(struct termios *ancien)
+{
+    struct termios nouveau;
+    // On sauvegarde l'ancien mode
+    tcgetattr(STDIN_FILENO, ancien);
+    nouveau = *ancien;
+    // On désactive ICANON (lecture caractère par caractère) et ECHO (ne pas afficher les touches)
+    nouveau.c_lflag &= ~(ICANON | ECHO);
+    // On applique le nouveau mode
+    tcsetattr(STDIN_FILENO, TCSANOW, &nouveau);
+}
+
+// Restaure l'ancien mode d'entrée (important après le menu pour ne pas bloquer le terminal)
+void restaurerEntree(struct termios *ancien)
+{
+    tcsetattr(STDIN_FILENO, TCSANOW, ancien);
+}
+
+// Affiche le menu en console
+// Si une option est sélectionnée, on l'affiche en vert avec ">"
+void afficherMenu(char **menu, int nbOptions, int selection)
+{
+    for (int i = 0; i < nbOptions; i++)
+    {
+        if (i == selection)
+            // Option sélectionnée → en vert
+            printf(" > \033[1;32m%d. %s\033[0m\n", i + 1, menu[i]);
+        else
+            // Option non sélectionnée → affichage normal
+            printf("   %d. %s\n", i + 1, menu[i]);
+    }
+}
+
+// Menu interactif : permet de naviguer avec les flèches haut/bas
+// Retourne l'index de l'option choisie quand on appuie sur Entrée
+int menuInteractif(char **menu, int nbOptions)
+{
+    struct termios ancien;
+    desactiverEntreeBufferisee(&ancien); // On passe en mode lecture caractère par caractère
+
+    int selection = 0; // L'option actuellement sélectionnée (indice)
+    char c;
+
+    while (1)
+    {
+        // Efface l'écran à chaque boucle (pour "rafraîchir" l'affichage du menu)
+        // Séquence d'échappement ANSI pour effacer l'écran et remettre le curseur en haut à gauche :
+        // \033[H → place le curseur à la position (1,1)
+        // \033[J → efface l'écran à partir de la position du curseur
+        // Utilisé pour redessiner proprement le menu à chaque boucle
+        printf("\033[H\033[J");
+        printf("== Menu ==\n\n");
+
+        afficherMenu(menu, nbOptions, selection); // Affiche le menu
+
+        c = getchar();
+        if (c == 27) // Si on a reçu le caractère ESC (code 27), cela signifie qu'une touche spéciale a été pressée (ex: flèches directionnelles) par example flèche haut : ESC [ A
+        {
+            getchar(); // On lit et ignore le caractère suivant '[' (fait partie de la séquence d'échappement des flèches)
+
+            switch (getchar()) // On lit le 3ème caractère qui indique quelle flèche a été pressée :
+                               // 'A' → Flèche Haut
+                               // 'B' → Flèche Bas
+            {
+            case KEY_UP:
+                // Flèche haut → on remonte dans le menu
+                selection = (selection - 1 + nbOptions) % nbOptions;
+                break;
+            case KEY_DOWN:
+                // Flèche bas → on descend dans le menu
+                selection = (selection + 1) % nbOptions;
+                break;
+            }
+        }
+        else if (c == KEY_ENTER)
+        {
+            // Touche Entrée → on valide le choix → on sort de la boucle
+            break;
+        }
+    }
+
+    restaurerEntree(&ancien); // On remet le terminal en mode normal
+    return selection;         // On retourne le choix de l'utilisateur
+}
+
+void affichageMachineMenu(Graphe g)
+{
+    // 1. Compter le nombre de stations
+    int nbStations = 0;
+    for (size_t i = 0; i < g.nb_equipements; i++)
+    {
+        if (g.equipements[i].type == STATION_TYPE)
+            nbStations++;
+    }
+
+    // 2. Allouer un tableau de chaînes pour le menu
+    char **menu = malloc(sizeof(char *) * nbStations);
+
+    // 3. Construire le menu avec les adresses MAC
     int j = 0;
-    printf(" Quelle station veut envoyer un message ? ");
     for (size_t i = 0; i < g.nb_equipements; i++)
     {
         if (g.equipements[i].type == STATION_TYPE)
         {
-            printf("%d - MAC : ", j);
-            afficherMAC(g.equipements[i].station.mac);
+            char *macStr = obtenirMACString(g.equipements[i].station.mac);
+
+            char ligneMenu[100];
+            sprintf(ligneMenu, "Station MAC : %s", macStr);
+
+            menu[j] = strdup(ligneMenu); // On copie la chaîne dans le tableau menu
+
+            free(macStr); // On libère la mémoire temporaire de getMACString
+
             j++;
         }
     }
-}
-int validerStationInput(Graphe g)
-{
-    // À FAIRE
-    int station;
 
-    return station;
+    // 4. Appeler le menu interactif
+    int choix = menuInteractif(menu, nbStations);
+
+    // 5. Afficher le choix
+    printf("Vous avez choisi : %d\n", (choix + nbStations));
+
+    // 6. Libérer la mémoire
+    for (int i = 0; i < nbStations; i++)
+    {
+        free(menu[i]);
+    }
+    free(menu);
 }

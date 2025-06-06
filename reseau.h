@@ -7,8 +7,13 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
+#include <termios.h>
+#include <unistd.h>
 
 #define MAX_DATA_SIZE 1500
+#define KEY_UP 65
+#define KEY_DOWN 66
+#define KEY_ENTER 10
 
 // Address structures
 typedef enum
@@ -97,14 +102,19 @@ typedef struct
 // Function declarations
 void afficherIP(AdresseIP ip);
 void afficherMacHexa(uint64_t mac);
-void afficherMAC(uint64_t mac);
+char *obtenirMACString(uint64_t mac);
 void afficherSwitch(Switch sw);
 void afficherSation(Station s);
 void afficherTrameUtilisateur(EthernetTram *trame);
 void afficherTrameHexa(EthernetTram *trame);
 void affichageMachine(Graphe g);
+void affichageMachineMenu(Graphe g);
+void afficherMenu(char **menu, int nbOptions, int selection);
+void restaurerEntree(struct termios *ancien);
+void desactiverEntreeBufferisee(struct termios *ancien);
 int hexCharToInt(char c);
 uint64_t convertMacToInteger(const char *str, uint64_t *mac);
+int menuInteractif(char **menu, int nbOptions);
 
 int creeReseau(const char *filePath, Graphe *reseau);
 int extraireNbEquipementsEtAretes(int *nbEquipements, int *nbAretes, char *ligne);

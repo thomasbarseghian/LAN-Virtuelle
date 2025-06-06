@@ -35,19 +35,20 @@ int main(int argc, char *argv[])
         // }
         // mettreJourTableCommutation(g);
         // afficherMAC(g.equipements[0].sw.mac);
-        EthernetTram t = {
-            .preambule = {0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA},
-            .SFD = 0xAB,
-            .Dest = 0x001A2B3C4D5E,
-            .Src = 0x0066778899AA,
-            .type = 0x0800,
-            .donnees = "Bonjour",
-            .FCS = 0x12345678};
+        // EthernetTram t = {
+        //     .preambule = {0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA},
+        //     .SFD = 0xAB,
+        //     .Dest = 0x001A2B3C4D5E,
+        //     .Src = 0x0066778899AA,
+        //     .type = 0x0800,
+        //     .donnees = "Bonjour",
+        //     .FCS = 0x12345678};
 
-        afficherTrameUtilisateur(&t);
-        afficherTrameHexa(&t);
-        affichageMachine(g);
-        validerStationInput(g);
+        // afficherTrameUtilisateur(&t);
+        // afficherTrameHexa(&t);
+        // affichageMachine(g);
+        // validerStationInput(g);
+        affichageMachineMenu(g);
     }
     else
         printf("Error dans fichier\n");

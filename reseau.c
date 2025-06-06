@@ -288,6 +288,7 @@ uint64_t convertMacToInteger(const char *str, uint64_t *mac)
     return EXIT_SUCCESS;
 }
 
+// Faut compléter
 int mettreJourTableCommutation(Graphe g)
 {
     int nbSwitches = nbSwitchReusax(g);
