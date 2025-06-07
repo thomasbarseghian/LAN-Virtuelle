@@ -311,22 +311,27 @@ void restaurerEntree(struct termios *ancien)
 
 // Affiche le menu en console
 // Si une option est sélectionnée, on l'affiche en vert avec ">"
-void afficherMenu(char **menu, int nbOptions, int selection)
+void afficherMenu(char **menu, int nbOptions, int selection, int dejaSelectionner)
 {
     for (int i = 0; i < nbOptions; i++)
     {
         if (i == selection)
-            // Option sélectionnée → en vert
-            printf(" > \033[1;32m%d. %s\033[0m\n", i + 1, menu[i]);
+        {
+            if (dejaSelectionner != i)
+            {
+                // Option sélectionnée → en vert
+                printf("> \033[1;32m %s\033[0m\n", menu[i]);
+            }
+        }
         else
             // Option non sélectionnée → affichage normal
-            printf("   %d. %s\n", i + 1, menu[i]);
+            printf("%s\n", menu[i]);
     }
 }
 
 // Menu interactif : permet de naviguer avec les flèches haut/bas
 // Retourne l'index de l'option choisie quand on appuie sur Entrée
-int menuInteractif(char **menu, int nbOptions)
+int menuInteractif(char **menu, int nbOptions, int dejaSelectionner)
 {
     struct termios ancien;
     desactiverEntreeBufferisee(&ancien); // On passe en mode lecture caractère par caractère
@@ -343,8 +348,11 @@ int menuInteractif(char **menu, int nbOptions)
         // Utilisé pour redessiner proprement le menu à chaque boucle
         printf("\033[H\033[J");
         printf("== Menu ==\n\n");
-
-        afficherMenu(menu, nbOptions, selection); // Affiche le menu
+        if (dejaSelectionner > -1)
+            printf("À qui vous voulez envoyer\n");
+        else
+            printf("Quelle machine veut envoyer\n");
+        afficherMenu(menu, nbOptions, selection, dejaSelectionner); // Affiche le menu
 
         c = getchar();
         if (c == 27) // Si on a reçu le caractère ESC (code 27), cela signifie qu'une touche spéciale a été pressée (ex: flèches directionnelles) par example flèche haut : ESC [ A
@@ -375,19 +383,19 @@ int menuInteractif(char **menu, int nbOptions)
     restaurerEntree(&ancien); // On remet le terminal en mode normal
     return selection;         // On retourne le choix de l'utilisateur
 }
-
-void affichageMachineMenu(Graphe g)
+int affichageMachineMenu(Graphe g, int optionDejaSelectionner)
 {
     // 1. Compter le nombre de stations
-    int nbStations = 0;
-    for (size_t i = 0; i < g.nb_equipements; i++)
-    {
-        if (g.equipements[i].type == STATION_TYPE)
-            nbStations++;
-    }
+    int nbStations;
+    if (optionDejaSelectionner > 0)
+        nbStations = nbStationReusax(g) - 1;
+    else
+        nbStations = nbStationReusax(g);
 
     // 2. Allouer un tableau de chaînes pour le menu
     char **menu = malloc(sizeof(char *) * nbStations);
+    // → On alloue aussi un tableau pour mémoriser les index dans g.equipements
+    int *indexEquipements = malloc(sizeof(int) * nbStations);
 
     // 3. Construire le menu avec les adresses MAC
     int j = 0;
@@ -395,24 +403,24 @@ void affichageMachineMenu(Graphe g)
     {
         if (g.equipements[i].type == STATION_TYPE)
         {
-            char *macStr = obtenirMACString(g.equipements[i].station.mac);
-
-            char ligneMenu[100];
-            sprintf(ligneMenu, "Station MAC : %s", macStr);
-
-            menu[j] = strdup(ligneMenu); // On copie la chaîne dans le tableau menu
-
-            free(macStr); // On libère la mémoire temporaire de getMACString
-
-            j++;
+            if (i != (size_t)optionDejaSelectionner)
+            {
+                char *macStr = obtenirMACString(g.equipements[i].station.mac);
+                char ligneMenu[100];
+                sprintf(ligneMenu, "Station MAC : %s", macStr);
+                menu[j] = strdup(ligneMenu); // On copie la chaîne dans le tableau menu
+                indexEquipements[j] = i;     // On mémorise l'index dans g.equipements !
+                free(macStr);                // On libère la mémoire temporaire
+                j++;
+            }
         }
     }
 
     // 4. Appeler le menu interactif
-    int choix = menuInteractif(menu, nbStations);
+    int choix = menuInteractif(menu, nbStations, optionDejaSelectionner);
 
-    // 5. Afficher le choix
-    printf("Vous avez choisi : %d\n", (choix + nbStations));
+    // 5. On récupère l'index réel dans g.equipements
+    int indexDansGraphe = indexEquipements[choix];
 
     // 6. Libérer la mémoire
     for (int i = 0; i < nbStations; i++)
@@ -420,4 +428,8 @@ void affichageMachineMenu(Graphe g)
         free(menu[i]);
     }
     free(menu);
+    free(indexEquipements);
+
+    // 7. Retourner le vrai index dans g.equipements
+    return indexDansGraphe;
 }

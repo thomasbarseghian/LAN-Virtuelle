@@ -48,7 +48,10 @@ int main(int argc, char *argv[])
         // afficherTrameHexa(&t);
         // affichageMachine(g);
         // validerStationInput(g);
-        affichageMachineMenu(g);
+        int sender = affichageMachineMenu(g, -1);
+        int receiver = affichageMachineMenu(g, sender);
+
+        printf("Machine %d is sending message to Machine %d\n", sender, receiver);
     }
     else
         printf("Error dans fichier\n");

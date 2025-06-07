@@ -108,13 +108,13 @@ void afficherSation(Station s);
 void afficherTrameUtilisateur(EthernetTram *trame);
 void afficherTrameHexa(EthernetTram *trame);
 void affichageMachine(Graphe g);
-void affichageMachineMenu(Graphe g);
-void afficherMenu(char **menu, int nbOptions, int selection);
+int affichageMachineMenu(Graphe g, int optionDejaSelectionner);
+void afficherMenu(char **menu, int nbOptions, int selection, int dejaSelectionner);
 void restaurerEntree(struct termios *ancien);
 void desactiverEntreeBufferisee(struct termios *ancien);
 int hexCharToInt(char c);
 uint64_t convertMacToInteger(const char *str, uint64_t *mac);
-int menuInteractif(char **menu, int nbOptions);
+int menuInteractif(char **menu, int nbOptions, int dejaSelectionner);
 
 int creeReseau(const char *filePath, Graphe *reseau);
 int extraireNbEquipementsEtAretes(int *nbEquipements, int *nbAretes, char *ligne);
