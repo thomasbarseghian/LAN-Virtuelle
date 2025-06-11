@@ -15,6 +15,8 @@
 #define KEY_DOWN 66
 #define KEY_ENTER 10
 
+#define MAX_HOPS 50
+
 // Address structures
 typedef enum
 {
@@ -151,5 +153,5 @@ void communiquer(Graphe *g);
 void remplirTablePort(Graphe *g);
 int surQuellePortConnecter(Graphe g, int senderIndex, int switchIndex);
 int envoyerTram(Graphe *g, int senderIndex, int receicerIndex, EthernetTram *t);
-int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, EthernetTram *t);
+int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, EthernetTram *t, int depth);
 #endif

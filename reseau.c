@@ -375,9 +375,13 @@ void communiquer(Graphe *g)
     envoyerTram(g, sender, receiver, &t);
 }
 
-// Fonction récursive pour transmettre la trame à travers les switches
-int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, EthernetTram *t)
+int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, EthernetTram *t, int depth)
 {
+    if (depth > MAX_HOPS)
+    {
+        printf("Erreur: boucle détectée (trop de sauts)\n");
+        return -1;
+    }
     Switch *sw = &g->equipements[currentSwitchIndex].sw;
 
     printf("  Passage par le switch %d (MAC %s)\n", currentSwitchIndex, obtenirMACString(sw->mac));
@@ -402,7 +406,7 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
             else
             {
                 // Recurse vers le switch suivant
-                return envoyerTramRec(g, destIndex, currentSwitchIndex, t);
+                return envoyerTramRec(g, destIndex, currentSwitchIndex, t, depth + 1);
             }
         }
     }
@@ -422,29 +426,23 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
     {
         int neighbor = sw->ports[i].connectedEquipementIndex;
 
-        if (neighbor == cameFromEquipIndex)
-            continue; // on évite de revenir en arrière
+        if (neighbor == -1 || neighbor == cameFromEquipIndex)
+            continue; // skip invalid or already visited node
 
         if (g->equipements[neighbor].type == STATION_TYPE)
         {
             if (g->equipements[neighbor].station.mac == t->Dest)
             {
-                printf("   Trame reçue par la machine (MAC: %lx)\n", t->Dest);
-                printf("   Contenu de la trame :\n");
-                printf("   De     : %lx\n", t->Src);
-                printf("   Vers   : %lx\n", t->Dest);
-                printf("   Données: %s\n", t->donnees);
+                // Print received data
                 return 1;
             }
         }
         else
         {
-            // Envoi récursif vers le switch connecté
-            if (envoyerTramRec(g, neighbor, currentSwitchIndex, t))
-                return 1; // stop si reçu
+            if (envoyerTramRec(g, neighbor, currentSwitchIndex, t, depth + 1))
+                return 1;
         }
     }
-
     return 0; // Trame non délivrée
 }
 
@@ -464,7 +462,7 @@ int envoyerTram(Graphe *g, int senderIndex, int receiverIndex, EthernetTram *t)
     mettreAJourTableCommutation(&g->equipements[senderSwitch].sw, t->Src, portOnSwitchSender);
 
     // Envoi réel de la trame
-    if (!envoyerTramRec(g, senderSwitch, senderIndex, t))
+    if (!envoyerTramRec(g, senderSwitch, senderIndex, t, 0))
     {
         printf("Le message n'a pas pu être délivré\n");
     }
