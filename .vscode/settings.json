@@ -1,9 +1,0 @@
-{
-  "files.associations": {
-    "reseau.h": "c",
-    "string.h": "c",
-    "cstdlib": "c",
-    "type_traits": "c",
-    "unistd.h": "c"
-  }
-}
