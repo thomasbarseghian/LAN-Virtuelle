@@ -12,8 +12,8 @@ void afficherMacHexa(uint64_t mac)
 
 char *obtenirMACString(uint64_t mac)
 {
+    static char buffer[18]; // 17 characters + null terminator
     uint8_t bytes[6];
-    char *buffer = malloc(sizeof(char) * 18);
 
     for (int i = 0; i < 6; i++)
     {
@@ -24,10 +24,8 @@ char *obtenirMACString(uint64_t mac)
             bytes[0], bytes[1], bytes[2],
             bytes[3], bytes[4], bytes[5]);
 
-    // printf("%s \n", buffer);
     return buffer;
 }
-
 void afficherSwitch(Switch sw)
 {
     printf("========= Switch =========\n");
