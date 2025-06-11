@@ -42,3 +42,7 @@ Makefile
 build/
 bin/
 obj/
+
+# === jsp ce que c'est ===
+
+main~*
