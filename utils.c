@@ -202,7 +202,7 @@ int partieIPEstValide(char *partie)
     return EXIT_SUCCESS;
 }
 
-int nbSwitchReusax(Graphe g)
+int nbSwitchReseaux(Graphe g)
 {
     int nbSwitches = 0;
     for (size_t i = 0; i < g.nb_equipements; i++)

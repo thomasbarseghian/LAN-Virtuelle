@@ -44,9 +44,9 @@ int main(int argc, char *argv[])
         communiquer(&g);
     }
     else
-        printf("Error dans fichier\n");
+        printf("Erreur dans le fichier\n");
 
-    for (int i = 0; i < nbSwitchReusax(g); i++)
+    for (int i = 0; i < nbSwitchReseaux(g); i++)
     {
         free(g.equipements[i].sw.tableCommutation);
         free(g.equipements[i].sw.ports);

@@ -1,7 +1,7 @@
 #include "reseau.h"
 
-// Fonction pour crée réseau à partie de fichier de configration
-// Cette fonction prend path de fichier que utilisateur va donner quand il execute le program
+// Fonction pour crée un réseau à partir de fichier de configration
+// Cette fonction prend le chemnin du fichier que utilisateur va donner quand il execute le programme
 // example: /main ./mylan.lan.txt
 int creeReseau(const char *filePath, Graphe *reseau)
 {
@@ -19,7 +19,7 @@ int creeReseau(const char *filePath, Graphe *reseau)
     if (lireNbEquipementsEtAretes(fptr, &nbEquipements, &nbAretes) != EXIT_SUCCESS)
         return EXIT_FAILURE;
     // ====================
-    // Étape 2 : Verifie que nombre de eqiupements et arêtes sont bonne
+    // Étape 2 : Verifie que le nombre de eqiupements et arêtes est bon
     // ====================
     if (verifieNbEquipementEtAretes(fptr, nbEquipements, nbAretes) != EXIT_SUCCESS)
         return EXIT_FAILURE;
@@ -264,7 +264,7 @@ int creerArrets(FILE *fptr, Graphe *reseau, int nbAretes)
 }
 void remplirTablePort(Graphe *g)
 {
-    size_t nbSwitches = nbSwitchReusax(*g);
+    size_t nbSwitches = nbSwitchReseaux(*g);
     for (size_t i = 0; i < nbSwitches; i++)
     {
         int k = 0;

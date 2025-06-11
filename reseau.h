@@ -140,7 +140,7 @@ int initialiserReseau(Graphe *reseau, int nbEquipements, int nbAretes);
 int creerEquipements(FILE *fptr, Graphe *reseau, int nbEquipements);
 int verifieNbEquipementEtAretes(FILE *fptr, int nbEquipements, int nbAretes);
 int creerArrets(FILE *fptr, Graphe *reseau, int nbAretes);
-int nbSwitchReusax(Graphe g);
+int nbSwitchReseaux(Graphe g);
 int nbStationReusax(Graphe g);
 int validerStationInput(Graphe g);
 void mettreAJourTableCommutation(Switch *sw, AdresseMAC mac, size_t portId);
