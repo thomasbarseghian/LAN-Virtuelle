@@ -408,7 +408,7 @@ int affichageMachineMenu(Graphe g, int optionDejaSelectionner)
                 sprintf(ligneMenu, "Station MAC : %s", macStr);
                 menu[j] = strdup(ligneMenu); // On copie la chaîne dans le tableau menu
                 indexEquipements[j] = i;     // On mémorise l'index dans g.equipements !
-                free(macStr);                // On libère la mémoire temporaire
+                                             // free(macStr);                // On libère la mémoire temporaire
                 j++;
             }
         }
