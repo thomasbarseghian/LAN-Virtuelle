@@ -81,7 +81,7 @@ typedef struct
     };
 } Equipement;
 
-// Arete entre l'equipements
+// Arete entre l'es quipements
 typedef struct
 {
     size_t index_e1;
@@ -151,7 +151,7 @@ int firstSwitchFound(Graphe g, size_t indexMachine);
 void communiquer(Graphe *g);
 
 void remplirTablePort(Graphe *g);
-int surQuellePortConnecter(Graphe g, int senderIndex, int switchIndex);
+int surQuelPortConnecter(Graphe g, int senderIndex, int switchIndex);
 int envoyerTram(Graphe *g, int senderIndex, int receicerIndex, EthernetTram *t);
 int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, EthernetTram *t, int depth);
 #endif

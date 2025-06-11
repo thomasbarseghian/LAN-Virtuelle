@@ -69,7 +69,7 @@ int lireNbEquipementsEtAretes(FILE *fptr, int *nbEquipements, int *nbAretes)
 }
 int verifieNbEquipementEtAretes(FILE *fptr, int nbEquipements, int nbAretes)
 {
-    int totalAttendu = nbEquipements + nbAretes + 1; // +1 for the header line
+    int totalAttendu = nbEquipements + nbAretes + 1; // +1 pour le header
     int totalLignes = 0;
     char ligne[256];
 
@@ -405,7 +405,7 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
             }
             else
             {
-                // Recurse vers le switch suivant
+                // Recursion, vers le switch suivant
                 return envoyerTramRec(g, destIndex, currentSwitchIndex, t, depth + 1);
             }
         }
@@ -450,11 +450,11 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
 int envoyerTram(Graphe *g, int senderIndex, int receiverIndex, EthernetTram *t)
 {
     int senderSwitch = firstSwitchFound(*g, senderIndex);
-    int portOnSwitchSender = surQuellePortConnecter(*g, senderIndex, senderSwitch);
+    int portOnSwitchSender = surQuelPortConnecter(*g, senderIndex, senderSwitch);
 
     if (senderSwitch == -1 || portOnSwitchSender == -1)
     {
-        printf("Erreur: machine %d n'est pas connectée à un switch\n", senderIndex);
+        printf("Erreur: la machine %d n'est pas connectée à un switch\n", senderIndex);
         return EXIT_FAILURE;
     }
 

@@ -464,7 +464,7 @@ int firstSwitchFound(Graphe g, size_t indexMachine)
     return -1; // Aucun switch trouvé
 }
 
-int surQuellePortConnecter(Graphe g, int senderIndex, int switchIndex)
+int surQuelPortConnecter(Graphe g, int senderIndex, int switchIndex)
 {
     if (switchIndex < 0 || (size_t)switchIndex >= g.nb_equipements)
         return -1;
