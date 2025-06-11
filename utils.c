@@ -24,7 +24,7 @@ char *obtenirMACString(uint64_t mac)
             bytes[0], bytes[1], bytes[2],
             bytes[3], bytes[4], bytes[5]);
 
-    printf("%s \n", buffer);
+    // printf("%s \n", buffer);
     return buffer;
 }
 
@@ -432,4 +432,54 @@ int affichageMachineMenu(Graphe g, int optionDejaSelectionner)
 
     // 7. Retourner le vrai index dans g.equipements
     return indexDansGraphe;
+}
+
+void afficherPortsSwitch(Graphe *g, Switch sw)
+{
+    printf("\n[Switch %s] Ports and Physical Connections:\n", obtenirMACString(sw.mac));
+
+    for (size_t i = 0; i < sw.nbPorts; i++)
+    {
+        Port port = sw.ports[i];
+
+        printf("  Port %zu: ", port.portId); // Use %zu for size_t
+        printf("Connected to Station %s\n", obtenirMACString(g->equipements[port.connectedEquipementIndex].station.mac));
+    }
+}
+
+int firstSwitchFound(Graphe g, size_t indexMachine)
+{
+    size_t N = g.nb_aretes;
+    for (size_t i = 0; i < N; i++)
+    {
+        if (g.aretes[i].index_e1 == indexMachine)
+        {
+            if (g.equipements[g.aretes[i].index_e2].type == SWITCH_TYPE)
+                return g.aretes[i].index_e2;
+        }
+        else if (g.aretes[i].index_e2 == indexMachine)
+        {
+            if (g.equipements[g.aretes[i].index_e1].type == SWITCH_TYPE)
+                return g.aretes[i].index_e1;
+        }
+    }
+    return -1; // Aucun switch trouvé
+}
+
+int surQuellePortConnecter(Graphe g, int senderIndex, int switchIndex)
+{
+    if (switchIndex < 0 || (size_t)switchIndex >= g.nb_equipements)
+        return -1;
+
+    Switch *sw = &g.equipements[switchIndex].sw;
+
+    for (size_t i = 0; i < sw->nbPorts; i++)
+    {
+        if (sw->ports[i].connectedEquipementIndex == (size_t)senderIndex)
+        {
+            return (int)i; // Found the correct port
+        }
+    }
+
+    return -1; // Not connected to this switch
 }

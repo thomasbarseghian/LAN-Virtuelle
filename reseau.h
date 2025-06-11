@@ -48,14 +48,23 @@ typedef struct
 
 } tableCommutation;
 
+typedef struct
+{
+    size_t portId;
+    TypePort typePort;
+    size_t connectedEquipementIndex;
+} Port;
+
 // Switch
 typedef struct
 {
     AdresseMAC mac;
     size_t nbPorts;
     size_t priorite;
-    TypePort *ports;
+    Port *ports;
     tableCommutation *tableCommutation;
+    size_t maxCapacityTable;
+    size_t nbTable;
 
 } Switch;
 
@@ -109,6 +118,7 @@ void afficherTrameUtilisateur(EthernetTram *trame);
 void afficherTrameHexa(EthernetTram *trame);
 void affichageMachine(Graphe g);
 int affichageMachineMenu(Graphe g, int optionDejaSelectionner);
+void afficherPortsSwitch(Graphe *g, Switch sw);
 void afficherMenu(char **menu, int nbOptions, int selection, int dejaSelectionner);
 void restaurerEntree(struct termios *ancien);
 void desactiverEntreeBufferisee(struct termios *ancien);
@@ -133,6 +143,13 @@ int creerArrets(FILE *fptr, Graphe *reseau, int nbAretes);
 int nbSwitchReusax(Graphe g);
 int nbStationReusax(Graphe g);
 int validerStationInput(Graphe g);
-int mettreJourTableCommutation(Graphe g);
+void mettreAJourTableCommutation(Switch *sw, AdresseMAC mac, size_t portId);
 
+int firstSwitchFound(Graphe g, size_t indexMachine);
+void communiquer(Graphe *g);
+
+void remplirTablePort(Graphe *g);
+int surQuellePortConnecter(Graphe g, int senderIndex, int switchIndex);
+int envoyerTram(Graphe *g, int senderIndex, int receicerIndex, EthernetTram *t);
+int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, EthernetTram *t);
 #endif
