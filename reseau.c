@@ -290,6 +290,7 @@ void remplirTablePort(Graphe *g)
         {
             sw->ports[p].connectedEquipementIndex = -1;
             sw->ports[p].portId = -1;
+            sw->ports[p].typePort = NON_DESIGNATED;
         }
 
         for (size_t j = 0; j < g->nb_aretes; j++)
@@ -482,7 +483,7 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
     {
         int neighbor = sw->ports[i].connectedEquipementIndex;
 
-        if (neighbor == -1 || neighbor == cameFromEquipIndex)
+        if (neighbor == -1 || neighbor == cameFromEquipIndex || sw->ports[i].typePort == NON_DESIGNATED)
             continue;
 
         if (g->equipements[neighbor].type == STATION_TYPE)
@@ -573,7 +574,8 @@ void lancerDijkstra(Graphe *g){
     size_t root = trouverSwitchRoot(g);
     size_t nbSwitches = nbSwitchReseaux(*g);
     double distance_sommet[nbSwitches];
-    dijkstra(g, root, g->aretes, distance_sommet);
+    int *predecesseur[nbSwitches];
+    dijkstra(g, root, g->aretes, distance_sommet, *predecesseur);
 }
 
 void initialiserBID(Graphe *g) {
@@ -615,46 +617,73 @@ double poids_entre(Graphe const *g, int u, int v, Arete aretes)
     return DBL_MAX; // Pas d'arrête
 }
 // Algorithme de Dijkstra
-void dijkstra(Graphe const *g, size_t root, Arete *aretes, double *distance_sommet)
+void dijkstra(Graphe const *g, size_t root, Arete *aretes, double *distance_sommet, int *predecesseur)
 {
     size_t nbSwitches = nbSwitchReseaux(*g);
     int n = nbSwitches;
     bool *fixe = calloc(n, sizeof(bool));
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++) {
         distance_sommet[i] = DBL_MAX;
+        predecesseur[i] = -1; // -1 signifie aucun prédécesseur
+    }
 
     distance_sommet[root] = 0;
 
-    for (int k = 0; k < n; k++)
-    {
+    for (int k = 0; k < n; k++) {
         int u = -1;
         double min = DBL_MAX;
-        for (int i = 0; i < n; i++)
-        {
-            if (!fixe[i] && distance_sommet[i] < min)
-            {
+        for (int i = 0; i < n; i++) {
+            if (!fixe[i] && distance_sommet[i] < min) {
                 min = distance_sommet[i];
                 u = i;
             }
         }
 
         if (u == -1)
-            break; // Plus de sommets accessibles
+            break;
 
         fixe[u] = true;
 
         size_t voisins[n];
         int nb_voisins = sommets_adjacents(g, u, voisins);
-        for (int i = 0; i < nb_voisins; i++)
-        {
+
+        for (int i = 0; i < nb_voisins; i++) {
             int v = voisins[i];
-            if (!fixe[v])
-            {
+            if (!fixe[v]) {
                 double w = poids_entre(g, u, v, *aretes);
-                if (distance_sommet[u] + w < distance_sommet[v])
-                {
+                if (distance_sommet[u] + w < distance_sommet[v]) {
                     distance_sommet[v] = distance_sommet[u] + w;
+                    predecesseur[v] = u;
+
+                    // Port sur u vers v
+                    Switch *sw = &g->equipements[u].sw;
+                    for (size_t pu = 0; pu < sw->nbPorts; pu++) {
+                        if ((int)sw->ports[pu].connectedEquipementIndex == v) {
+                            sw->ports[pu].typePort = DESIGNATED;
+                            break;
+                        }
+                    }
+
+                    // Port sur v vers u
+                    for (size_t pv = 0; pv < sw->nbPorts; pv++) {
+                        if ((int)sw->ports[pv].connectedEquipementIndex == u) {
+                            sw->ports[pv].typePort = DESIGNATED;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for (size_t i = 0; i < (size_t)n; i++) {
+        if (i != root && predecesseur[i] != -1) {
+            size_t pred = predecesseur[i];
+            Switch *sw2 = &g->equipements[i].sw;
+            for (size_t l = 0; l < sw2->nbPorts; l++) {
+                if (sw2->ports[l].connectedEquipementIndex == pred) {
+                    sw2->ports[l].typePort = ROOT;
+                    break;
                 }
             }
         }
