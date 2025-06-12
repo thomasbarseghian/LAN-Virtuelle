@@ -481,3 +481,9 @@ int surQuelPortConnecter(Graphe g, int senderIndex, int switchIndex)
 
     return -1; // Not connected to this switch
 }
+
+//Pour Dijkstra
+
+uint64_t genererBID(uint16_t priorite, uint64_t mac) {
+    return ((uint64_t)priorite << 48) | (mac & 0xFFFFFFFFFFFF);
+}

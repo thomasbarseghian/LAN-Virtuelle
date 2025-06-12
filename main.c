@@ -40,7 +40,15 @@ int main(int argc, char *argv[])
         // afficherTrameHexa(&t);
         // affichageMachine(g);
         // validerStationInput(g);
+        printf("Taper 1 pour activer le protocole STP, 0 sinon : ");
 
+        size_t reponse;
+        scanf("%zu", &reponse);
+
+        if (reponse == 1) 
+        {
+            lancerDijkstra(&g);
+        }
         communiquer(&g);
     }
     else

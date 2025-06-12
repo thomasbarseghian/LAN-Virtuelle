@@ -55,6 +55,7 @@ typedef struct
     size_t portId;
     TypePort typePort;
     size_t connectedEquipementIndex;
+    size_t coutVersRoot;
 } Port;
 
 // Switch
@@ -67,7 +68,7 @@ typedef struct
     tableCommutation *tableCommutation;
     size_t maxCapacityTable;
     size_t nbTable;
-
+    size_t BID;
 } Switch;
 
 // Union structure
@@ -154,4 +155,12 @@ void remplirTablePort(Graphe *g);
 int surQuelPortConnecter(Graphe g, int senderIndex, int switchIndex);
 int envoyerTram(Graphe *g, int senderIndex, int receicerIndex, EthernetTram *t);
 int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, EthernetTram *t, int depth);
+
+//Pour Dijkstra
+
+void lancerDijkstra(Graphe *g);
+uint64_t genererBID(uint16_t priorite, uint64_t mac);
+int trouverSwitchRoot(Graphe *g);
+void initialiserBID(Graphe *g);
+
 #endif

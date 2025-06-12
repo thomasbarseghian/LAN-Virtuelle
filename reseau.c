@@ -469,3 +469,42 @@ int envoyerTram(Graphe *g, int senderIndex, int receiverIndex, EthernetTram *t)
 
     return EXIT_SUCCESS;
 }
+
+//STP
+
+void lancerDijkstra(Graphe *g){
+
+    // ====================
+    // Etape 1 : Initialise BID sur chaque switch
+    // ====================
+    initialiserBID(g);
+}
+
+void initialiserBID(Graphe *g) {
+    int nb_equipements = g->nb_equipements;
+
+    for (int i = 0; i < nb_equipements; i++) {
+        if (g->equipements[i].type == SWITCH_TYPE) {
+            uint16_t priorite = 32768; // valeur par défaut
+            uint64_t mac = g->equipements[i].sw.mac;
+            g->equipements[i].sw.BID = genererBID(priorite, mac);
+        }
+    }
+}
+
+int trouverSwitchRoot(Graphe *g) {
+    int nbSwitches = nbSwitchReseaux(*g);
+    int rootIndex = -1;
+    uint64_t minBID = UINT64_MAX;
+
+    for (int i = 0; i < nbSwitches; i++) {
+        if (g->equipements[i].type == SWITCH_TYPE) {
+            uint64_t bid = g->equipements[i].sw.BID;
+            if (bid < minBID) {
+                minBID = bid;
+                rootIndex = i;
+            }
+        }
+    }
+    return rootIndex;
+}
