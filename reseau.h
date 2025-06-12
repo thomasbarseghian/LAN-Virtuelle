@@ -128,6 +128,7 @@ void desactiverEntreeBufferisee(struct termios *ancien);
 int hexCharToInt(char c);
 uint64_t convertMacToInteger(const char *str, uint64_t *mac);
 int menuInteractif(char **menu, int nbOptions, int dejaSelectionner);
+void afficherReseau(const Graphe *reseau);
 
 int creeReseau(const char *filePath, Graphe *reseau);
 int extraireNbEquipementsEtAretes(int *nbEquipements, int *nbAretes, char *ligne);
