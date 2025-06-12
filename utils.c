@@ -28,17 +28,23 @@ char *obtenirMACString(uint64_t mac)
 }
 void afficherSwitch(Switch sw)
 {
-    printf("========= Switch =========\n");
-    printf("Adresse Mac : %lu\n", sw.mac);
-    printf("Nombre de ports : %ld\n", sw.nbPorts);
-    printf("Priorité : %ld\n", sw.priorite);
+    printf("╔══════════════════════════════════════╗\n");
+    printf("║               SWITCH                 ║\n");
+    printf("╠══════════════════════════════════════╣\n");
+    printf("║ Adresse MAC     : %-17s  ║\n", obtenirMACString(sw.mac));
+    printf("║ Nombre de ports : %-17ld  ║\n", sw.nbPorts);
+    printf("║ Priorité        : %-17ld  ║\n", sw.priorite);
+    printf("╚══════════════════════════════════════╝\n");
 }
 
 void afficherSation(Station s)
 {
-    printf("========= Station =========\n");
-    printf("Adresse Mac : %lu\n", s.mac);
-    printf("Adresse ip : %s\n", s.ip);
+    printf("╔══════════════════════════════════════╗\n");
+    printf("║               Station                ║\n");
+    printf("╠══════════════════════════════════════╣\n");
+    printf("║ Adresse MAC     : %-17s  ║\n", obtenirMACString(s.mac));
+    printf("║ Nombre de ports : %-17s  ║\n", s.ip);
+    printf("╚══════════════════════════════════════╝\n");
 }
 
 // Convertit un caractère hexadécimal ('0'-'9', 'a'-'f', 'A'-'F') en entier
@@ -480,4 +486,51 @@ int surQuellePortConnecter(Graphe g, int senderIndex, int switchIndex)
     }
 
     return -1; // Not connected to this switch
+}
+
+void afficherReseau(const Graphe *reseau)
+{
+    printf("\n========== Réseau ==========\n\n");
+
+    for (size_t i = 0; i < reseau->nb_equipements; i++)
+    {
+        const Equipement *eq = &reseau->equipements[i];
+        if (eq->type == STATION_TYPE)
+        {
+            // Station
+            afficherSation(eq->station);
+        }
+        else if (eq->type == SWITCH_TYPE)
+        {
+            // Switch
+            const Switch *sw = &eq->sw;
+            afficherSwitch(*sw);
+
+            printf("  Table de commutation (%zu entrées) :\n", sw->nbTable);
+
+            // Top border
+            printf("  ┌────────────┬───────────────────┐\n");
+
+            // Header row
+            printf("  │ %-10s │ %-17s │\n", "Port", "Adresse MAC");
+
+            // Header-data separator
+            printf("  ├────────────┼───────────────────┤\n");
+
+            // Rows
+            for (size_t j = 0; j < sw->nbTable; j++)
+            {
+                printf("  │ %-10d │ %-17s │\n", (int)sw->tableCommutation[j].nbPort,
+                       obtenirMACString(sw->tableCommutation[j].AdresseMAC));
+            }
+
+            // Bottom border
+            printf("  └────────────┴───────────────────┘\n\n");
+        }
+        else
+        {
+            printf("Equipement #%zu : Type inconnu\n\n", i);
+        }
+    }
+    printf("===========================\n");
 }

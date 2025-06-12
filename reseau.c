@@ -17,27 +17,42 @@ int creeReseau(const char *filePath, Graphe *reseau)
     // ====================
     int nbEquipements = 0, nbAretes = 0;
     if (lireNbEquipementsEtAretes(fptr, &nbEquipements, &nbAretes) != EXIT_SUCCESS)
+    {
+        fclose(fptr);
         return EXIT_FAILURE;
+    }
     // ====================
     // Étape 2 : Verifie que nombre de eqiupements et arêtes sont bonne
     // ====================
     if (verifieNbEquipementEtAretes(fptr, nbEquipements, nbAretes) != EXIT_SUCCESS)
+    {
+        fclose(fptr);
         return EXIT_FAILURE;
+    }
     // ====================
     // Étape 3 : Allocation mémoire pour le graphe
     // ====================
     if (initialiserReseau(reseau, nbEquipements, nbAretes) != EXIT_SUCCESS)
+    {
+        fclose(fptr);
         return EXIT_FAILURE;
+    }
     // ====================
     // Étape 4 : Lecture des équipements
     // ====================
     if (creerEquipements(fptr, reseau, nbEquipements) != EXIT_SUCCESS)
+    {
+        fclose(fptr);
         return EXIT_FAILURE;
+    }
     // ====================
     // Étape 5 : Lecture des Aretes
     // ====================
     if (creerArrets(fptr, reseau, nbAretes) != EXIT_SUCCESS)
+    {
+        fclose(fptr);
         return EXIT_FAILURE;
+    }
     fclose(fptr);
 
     remplirTablePort(reseau);
@@ -280,18 +295,18 @@ void remplirTablePort(Graphe *g)
         {
             if (g->aretes[j].index_e1 == i)
             {
-                printf("Switch %s is connected on port %d with %s\n",
-                       obtenirMACString(sw->mac), k,
-                       obtenirMACString(g->equipements[g->aretes[j].index_e2].station.mac));
+                // printf("Switch %s is connected on port %d with %s\n",
+                //        obtenirMACString(sw->mac), k,
+                //        obtenirMACString(g->equipements[g->aretes[j].index_e2].station.mac));
                 sw->ports[k].connectedEquipementIndex = g->aretes[j].index_e2;
                 sw->ports[k].portId = k;
                 k++;
             }
             else if (g->aretes[j].index_e2 == i)
             {
-                printf("Switch %s is connected on port %d with %s\n",
-                       obtenirMACString(sw->mac), k,
-                       obtenirMACString(g->equipements[g->aretes[j].index_e1].station.mac));
+                // printf("Switch %s is connected on port %d with %s\n",
+                //        obtenirMACString(sw->mac), k,
+                //        obtenirMACString(g->equipements[g->aretes[j].index_e1].station.mac));
                 sw->ports[k].connectedEquipementIndex = g->aretes[j].index_e1;
                 sw->ports[k].portId = k;
                 k++;
@@ -352,6 +367,18 @@ void mettreAJourTableCommutation(Switch *sw, AdresseMAC mac, size_t portId)
         printf("Table full, cannot add MAC %s\n", obtenirMACString(mac));
     }
 }
+int findEquipementIndexByMAC(Graphe *g, uint64_t mac)
+{
+    for (size_t i = 0; i < g->nb_equipements; i++)
+    {
+        if (g->equipements[i].type == STATION_TYPE && g->equipements[i].station.mac == mac)
+            return i;
+        else if (g->equipements[i].type == SWITCH_TYPE && g->equipements[i].sw.mac == mac)
+            return i;
+    }
+    return -1;
+}
+
 // Fonction principale pour initier la communication entre deux machines
 void communiquer(Graphe *g)
 {
@@ -379,12 +406,13 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
 {
     if (depth > MAX_HOPS)
     {
-        printf("Erreur: boucle détectée (trop de sauts)\n");
+        fprintf(stderr, "⚠️  Erreur : Boucle détectée ! Trop de sauts successifs (protection anti-boucle).\n");
         return -1;
     }
+
     Switch *sw = &g->equipements[currentSwitchIndex].sw;
 
-    printf("  Passage par le switch %d (MAC %s)\n", currentSwitchIndex, obtenirMACString(sw->mac));
+    printf("➡️  Switch %d (MAC %s) inspecte la trame...\n", currentSwitchIndex, obtenirMACString(sw->mac));
 
     // Vérifie si la table de commutation contient déjà l’adresse MAC de destination
     for (size_t i = 0; i < sw->nbTable; i++)
@@ -396,22 +424,48 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
 
             if (g->equipements[destIndex].type == STATION_TYPE)
             {
-                printf("   Trame reçue par la machine (MAC: %lx)\n", t->Dest);
-                printf("   Contenu de la trame :\n");
-                printf("   De     : %lx\n", t->Src);
-                printf("   Vers   : %lx\n", t->Dest);
-                printf("   Données: %s\n", t->donnees);
+                if (strstr((const char *)t->donnees, "ACK") != NULL)
+                {
+                    printf("\n✅ ACK reçue par %s de la part de %s : %s\n", obtenirMACString(t->Dest), obtenirMACString(t->Src), t->donnees);
+                }
+                else
+                {
+                    printf("\n📥 Machine (MAC: %s) a REÇU la trame !\n", obtenirMACString(t->Dest));
+                    printf("🔍 Trame reçue :\n");
+                    printf("   De     : %sx\n", obtenirMACString(t->Src));
+                    printf("   Vers   : %sx\n", obtenirMACString(t->Dest));
+                    printf("   Données: %s\n", t->donnees);
+
+                    // 🔁 Préparer et envoyer une trame ACK
+                    EthernetTram ackTrame = {
+                        .preambule = {0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA},
+                        .SFD = 0xAB,
+                        .Dest = t->Src,
+                        .Src = t->Dest,
+                        .type = 0x0800,
+                        .donnees = "ACK: Message reçu",
+                        .FCS = 0x12345678};
+
+                    int receiverIndex = destIndex;
+                    int senderIndex = findEquipementIndexByMAC(g, t->Src);
+
+                    if (senderIndex != -1)
+                    {
+                        printf("\n↩️ Machine (MAC: %lx) envoie une ACK à %lx\n", t->Dest, t->Src);
+                        envoyerTram(g, receiverIndex, senderIndex, &ackTrame);
+                    }
+                }
+
                 return 1;
             }
             else
             {
-                // Recurse vers le switch suivant
                 return envoyerTramRec(g, destIndex, currentSwitchIndex, t, depth + 1);
             }
         }
     }
 
-    // Si la MAC n'est pas connue, on apprend la MAC source
+    // Apprendre la MAC source (mise à jour de la table)
     for (size_t i = 0; i < sw->nbPorts; i++)
     {
         if (sw->ports[i].connectedEquipementIndex == (size_t)cameFromEquipIndex)
@@ -421,19 +475,50 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
         }
     }
 
-    // Diffusion (broadcast) de la trame sur les autres ports
+    // Diffusion de la trame si l’adresse n’est pas connue
     for (size_t i = 0; i < sw->nbPorts; i++)
     {
         int neighbor = sw->ports[i].connectedEquipementIndex;
 
         if (neighbor == -1 || neighbor == cameFromEquipIndex)
-            continue; // skip invalid or already visited node
+            continue;
 
         if (g->equipements[neighbor].type == STATION_TYPE)
         {
             if (g->equipements[neighbor].station.mac == t->Dest)
             {
-                // Print received data
+                if (strstr((const char *)t->donnees, "ACK") != NULL)
+                {
+                    printf("\n✅ ACK reçue par %lx de la part de %lx : %s\n", t->Dest, t->Src, t->donnees);
+                }
+                else
+                {
+                    printf("\n📥 Machine (MAC: %lx) a REÇU la trame !\n", t->Dest);
+                    printf("🔍 Trame reçue :\n");
+                    printf("   De     : %lx\n", t->Src);
+                    printf("   Vers   : %lx\n", t->Dest);
+                    printf("   Données: %s\n", t->donnees);
+
+                    // 🔁 Préparer et envoyer une trame ACK
+                    EthernetTram ackTrame = {
+                        .preambule = {0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA},
+                        .SFD = 0xAB,
+                        .Dest = t->Src,
+                        .Src = t->Dest,
+                        .type = 0x0800,
+                        .donnees = "ACK: Message reçu",
+                        .FCS = 0x12345678};
+
+                    int receiverIndex = neighbor;
+                    int senderIndex = findEquipementIndexByMAC(g, t->Src);
+
+                    if (senderIndex != -1)
+                    {
+                        printf("\n↩️ Machine (MAC: %lx) envoie une ACK à %lx\n", t->Dest, t->Src);
+                        envoyerTram(g, receiverIndex, senderIndex, &ackTrame);
+                    }
+                }
+
                 return 1;
             }
         }
@@ -443,7 +528,8 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
                 return 1;
         }
     }
-    return 0; // Trame non délivrée
+
+    return 0;
 }
 
 // Fonction qui initialise l’envoi d’une trame depuis une machine vers une autre
@@ -454,17 +540,21 @@ int envoyerTram(Graphe *g, int senderIndex, int receiverIndex, EthernetTram *t)
 
     if (senderSwitch == -1 || portOnSwitchSender == -1)
     {
-        printf("Erreur: machine %d n'est pas connectée à un switch\n", senderIndex);
+        fprintf(stderr, "❌ Erreur : La machine %d n’est pas connectée à un switch !\n", senderIndex);
         return EXIT_FAILURE;
     }
 
     // Mise à jour de la table de commutation du switch source avec l’adresse MAC de l’émetteur
     mettreAJourTableCommutation(&g->equipements[senderSwitch].sw, t->Src, portOnSwitchSender);
 
-    // Envoi réel de la trame
+    printf("\n🔼 Envoi d'une trame de %s à %s\n", obtenirMACString(t->Src), obtenirMACString(t->Dest));
     if (!envoyerTramRec(g, senderSwitch, senderIndex, t, 0))
     {
-        printf("Le message n'a pas pu être délivré\n");
+        printf("❌ Le message n'a pas pu être délivré\n");
+    }
+    else
+    {
+        printf("✅ Le message a été délivré avec succès\n");
     }
 
     return EXIT_SUCCESS;
