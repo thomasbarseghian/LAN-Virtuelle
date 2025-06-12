@@ -1,4 +1,5 @@
 #include "reseau.h"
+#include <float.h>
 
 // Fonction pour crée un réseau à partir de fichier de configration
 // Cette fonction prend le chemnin du fichier que utilisateur va donner quand il execute le programme
@@ -561,7 +562,7 @@ int envoyerTram(Graphe *g, int senderIndex, int receiverIndex, EthernetTram *t)
     return EXIT_SUCCESS;
 }
 
-//STP
+//Dijkstra
 
 void lancerDijkstra(Graphe *g){
 
@@ -569,6 +570,10 @@ void lancerDijkstra(Graphe *g){
     // Etape 1 : Initialise BID sur chaque switch
     // ====================
     initialiserBID(g);
+    size_t root = trouverSwitchRoot(g);
+    size_t nbSwitches = nbSwitchReseaux(*g);
+    double distance_sommet[nbSwitches];
+    dijkstra(g, root, g->aretes, distance_sommet);
 }
 
 void initialiserBID(Graphe *g) {
@@ -583,12 +588,12 @@ void initialiserBID(Graphe *g) {
     }
 }
 
-int trouverSwitchRoot(Graphe *g) {
-    int nbSwitches = nbSwitchReseaux(*g);
-    int rootIndex = -1;
+size_t trouverSwitchRoot(Graphe *g) {
+    size_t nbSwitches = nbSwitchReseaux(*g);
+    size_t rootIndex = -1;
     uint64_t minBID = UINT64_MAX;
 
-    for (int i = 0; i < nbSwitches; i++) {
+    for (size_t i = 0; i < nbSwitches; i++) {
         if (g->equipements[i].type == SWITCH_TYPE) {
             uint64_t bid = g->equipements[i].sw.BID;
             if (bid < minBID) {
@@ -598,4 +603,62 @@ int trouverSwitchRoot(Graphe *g) {
         }
     }
     return rootIndex;
+}
+
+double poids_entre(Graphe const *g, int u, int v, Arete aretes)
+{
+    for (size_t i = 0; i < g->nb_aretes; i++)
+    {
+        if (((int)g->aretes[i].index_e1 == u && (int)g->aretes[i].index_e2 == v) || ((int)g->aretes[i].index_e2  == u && (int)g->aretes[i].index_e1  == v))
+            return g->aretes[i].poids;
+    }
+    return DBL_MAX; // Pas d'arrête
+}
+// Algorithme de Dijkstra
+void dijkstra(Graphe const *g, size_t root, Arete *aretes, double *distance_sommet)
+{
+    size_t nbSwitches = nbSwitchReseaux(*g);
+    int n = nbSwitches;
+    bool *fixe = calloc(n, sizeof(bool));
+
+    for (int i = 0; i < n; i++)
+        distance_sommet[i] = DBL_MAX;
+
+    distance_sommet[root] = 0;
+
+    for (int k = 0; k < n; k++)
+    {
+        int u = -1;
+        double min = DBL_MAX;
+        for (int i = 0; i < n; i++)
+        {
+            if (!fixe[i] && distance_sommet[i] < min)
+            {
+                min = distance_sommet[i];
+                u = i;
+            }
+        }
+
+        if (u == -1)
+            break; // Plus de sommets accessibles
+
+        fixe[u] = true;
+
+        size_t voisins[n];
+        int nb_voisins = sommets_adjacents(g, u, voisins);
+        for (int i = 0; i < nb_voisins; i++)
+        {
+            int v = voisins[i];
+            if (!fixe[v])
+            {
+                double w = poids_entre(g, u, v, *aretes);
+                if (distance_sommet[u] + w < distance_sommet[v])
+                {
+                    distance_sommet[v] = distance_sommet[u] + w;
+                }
+            }
+        }
+    }
+
+    free(fixe);
 }

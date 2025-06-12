@@ -540,3 +540,30 @@ void afficherReseau(const Graphe *reseau)
 uint64_t genererBID(uint16_t priorite, uint64_t mac) {
     return ((uint64_t)priorite << 48) | (mac & 0xFFFFFFFFFFFF);
 }
+
+size_t sommets_adjacents(graphe const *g, size_t s, sommet sa[])
+{
+    // remplit le tableau sa avec les sommets adjacents de s dans g
+    // et retourne le nombre de sommets ainsi stockés
+    // (on suppose que s fait bien partie du graphe g)
+    // (le tableau sa est supposé assez grand pour contenir les sommets adjacents de s)
+    int res = 0;
+    for(int i=0;i<g->ordre;i++){
+        if(existe_arete(g,(arete){s,i})){
+            sa[res]=i;
+            res++;
+        }
+    }
+    return res;
+}
+bool existe_arete(Graphe const *g, Arete a)
+{
+    // retourne true si l'arête a est contenue dans le graphe g, false sinon
+    // /!\ l'arête (s1,s2) et l'arête (s2,s1) sont considérées équivalentes
+   for(int i=0;i<g->nb_aretes;i++){
+     if((g->aretes[i].index_e1==a.index_e1&&g->aretes[i].index_e2==a.index_e2)||g->aretes[i].index_e2==a.index_e1&&g->aretes[i].index_e1==a.index_e2){
+        return true;
+      }
+   }
+    return false;
+}

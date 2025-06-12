@@ -161,7 +161,11 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
 
 void lancerDijkstra(Graphe *g);
 uint64_t genererBID(uint16_t priorite, uint64_t mac);
-int trouverSwitchRoot(Graphe *g);
+size_t trouverSwitchRoot(Graphe *g);
 void initialiserBID(Graphe *g);
+void dijkstra(Graphe const *g, size_t root, Arete *aretes, double *distance_sommet);
+double poids_entre(Graphe const *g, int u, int v, Arete aretes);
+bool existe_arete(Graphe const *g, Arete a);
+size_t sommets_adjacents(Graphe const *g, size_t s, size_t sa[])
 
 #endif
