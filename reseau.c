@@ -302,8 +302,9 @@ void remplirTablePort(Graphe *g)
                 //        obtenirMACString(g->equipements[g->aretes[j].index_e2].station.mac));
                 sw->ports[k].connectedEquipementIndex = g->aretes[j].index_e2;
                 sw->ports[k].portId = k;
-                if(g->equipements[sw->ports[k].connectedEquipementIndex].type==STATION_TYPE){
-                   sw->ports[k].typePort = DESIGNATED;
+                if (g->equipements[sw->ports[k].connectedEquipementIndex].type == STATION_TYPE)
+                {
+                    sw->ports[k].typePort = DESIGNATED;
                 }
                 k++;
             }
@@ -314,8 +315,9 @@ void remplirTablePort(Graphe *g)
                 //        obtenirMACString(g->equipements[g->aretes[j].index_e1].station.mac));
                 sw->ports[k].connectedEquipementIndex = g->aretes[j].index_e1;
                 sw->ports[k].portId = k;
-                if(g->equipements[sw->ports[k].connectedEquipementIndex].type==STATION_TYPE){
-                   sw->ports[k].typePort = DESIGNATED;
+                if (g->equipements[sw->ports[k].connectedEquipementIndex].type == STATION_TYPE)
+                {
+                    sw->ports[k].typePort = DESIGNATED;
                 }
                 k++;
             }
@@ -434,7 +436,7 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
             {
                 if (strstr((const char *)t->donnees, "ACK") != NULL)
                 {
-                    printf("\n✅ ACK reçue par %s de la part de %s : %s\n", obtenirMACString(t->Dest), obtenirMACString(t->Src), t->donnees);
+                    printf("✅ ACK reçue\n");
                 }
                 else
                 {
@@ -491,7 +493,7 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
 
         if (neighbor == -1 || neighbor == cameFromEquipIndex)
             continue;
-        if( sw->ports[i].typePort == NON_DESIGNATED)
+        if (sw->ports[i].typePort == NON_DESIGNATED)
             continue;
         if (g->equipements[neighbor].type == STATION_TYPE)
         {
@@ -499,7 +501,7 @@ int envoyerTramRec(Graphe *g, int currentSwitchIndex, int cameFromEquipIndex, Et
             {
                 if (strstr((const char *)t->donnees, "ACK") != NULL)
                 {
-                    printf("\n✅ ACK reçue par %lx de la part de %lx : %s\n", t->Dest, t->Src, t->donnees);
+                    printf("✅ ACK reçue\n");
                 }
                 else
                 {
@@ -557,7 +559,6 @@ int envoyerTram(Graphe *g, int senderIndex, int receiverIndex, EthernetTram *t)
     // Mise à jour de la table de commutation du switch source avec l’adresse MAC de l’émetteur
     mettreAJourTableCommutation(&g->equipements[senderSwitch].sw, t->Src, portOnSwitchSender);
 
-    printf("\n🔼 Envoi d'une trame de %s à %s\n", obtenirMACString(t->Src), obtenirMACString(t->Dest));
     if (!envoyerTramRec(g, senderSwitch, senderIndex, t, 0))
     {
         printf("❌ Le message n'a pas pu être délivré\n");
@@ -570,9 +571,10 @@ int envoyerTram(Graphe *g, int senderIndex, int receiverIndex, EthernetTram *t)
     return EXIT_SUCCESS;
 }
 
-//Dijkstra
+// Dijkstra
 
-void lancerDijkstra(Graphe *g){
+void lancerDijkstra(Graphe *g)
+{
 
     // ====================
     // Etape 1 : Initialise BID sur chaque switch
@@ -585,11 +587,14 @@ void lancerDijkstra(Graphe *g){
     dijkstra(g, root, g->aretes, distance_sommet, predecesseur);
 }
 
-void initialiserBID(Graphe *g) {
+void initialiserBID(Graphe *g)
+{
     int nb_equipements = g->nb_equipements;
 
-    for (int i = 0; i < nb_equipements; i++) {
-        if (g->equipements[i].type == SWITCH_TYPE) {
+    for (int i = 0; i < nb_equipements; i++)
+    {
+        if (g->equipements[i].type == SWITCH_TYPE)
+        {
             uint16_t priorite = 32768; // valeur par défaut
             uint64_t mac = g->equipements[i].sw.mac;
             g->equipements[i].sw.BID = genererBID(priorite, mac);
@@ -597,15 +602,19 @@ void initialiserBID(Graphe *g) {
     }
 }
 
-size_t trouverSwitchRoot(Graphe *g) {
+size_t trouverSwitchRoot(Graphe *g)
+{
     size_t nbSwitches = nbSwitchReseaux(*g);
     size_t rootIndex = -1;
     uint64_t minBID = UINT64_MAX;
 
-    for (size_t i = 0; i < nbSwitches; i++) {
-        if (g->equipements[i].type == SWITCH_TYPE) {
+    for (size_t i = 0; i < nbSwitches; i++)
+    {
+        if (g->equipements[i].type == SWITCH_TYPE)
+        {
             uint64_t bid = g->equipements[i].sw.BID;
-            if (bid < minBID) {
+            if (bid < minBID)
+            {
                 minBID = bid;
                 rootIndex = i;
             }
@@ -618,7 +627,7 @@ double poids_entre(Graphe const *g, int u, int v, Arete aretes)
 {
     for (size_t i = 0; i < g->nb_aretes; i++)
     {
-        if (((int)g->aretes[i].index_e1 == u && (int)g->aretes[i].index_e2 == v) || ((int)g->aretes[i].index_e2  == u && (int)g->aretes[i].index_e1  == v))
+        if (((int)g->aretes[i].index_e1 == u && (int)g->aretes[i].index_e2 == v) || ((int)g->aretes[i].index_e2 == u && (int)g->aretes[i].index_e1 == v))
             return g->aretes[i].poids;
     }
     return DBL_MAX; // Pas d'arrête
@@ -630,18 +639,22 @@ void dijkstra(Graphe const *g, size_t root, Arete *aretes, double *distance_somm
     int n = nbSwitches;
     bool *fixe = calloc(n, sizeof(bool));
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         distance_sommet[i] = DBL_MAX;
         predecesseur[i] = -1; // -1 signifie aucun prédécesseur
     }
 
     distance_sommet[root] = 0;
 
-    for (int k = 0; k < n; k++) {
+    for (int k = 0; k < n; k++)
+    {
         int u = -1;
         double min = DBL_MAX;
-        for (int i = 0; i < n; i++) {
-            if (!fixe[i] && distance_sommet[i] < min) {
+        for (int i = 0; i < n; i++)
+        {
+            if (!fixe[i] && distance_sommet[i] < min)
+            {
                 min = distance_sommet[i];
                 u = i;
             }
@@ -655,18 +668,23 @@ void dijkstra(Graphe const *g, size_t root, Arete *aretes, double *distance_somm
         size_t voisins[n];
         int nb_voisins = sommets_adjacents(g, u, voisins);
 
-        for (int i = 0; i < nb_voisins; i++) {
+        for (int i = 0; i < nb_voisins; i++)
+        {
             int v = voisins[i];
-            if (!fixe[v]) {
+            if (!fixe[v])
+            {
                 double w = poids_entre(g, u, v, *aretes);
-                if (distance_sommet[u] + w < distance_sommet[v]) {
+                if (distance_sommet[u] + w < distance_sommet[v])
+                {
                     distance_sommet[v] = distance_sommet[u] + w;
                     predecesseur[v] = u;
 
                     // Port sur u vers v
                     Switch *sw_u = &g->equipements[u].sw;
-                    for (size_t pu = 0; pu < sw_u->nbPorts; pu++) {
-                        if ((int)sw_u->ports[pu].connectedEquipementIndex == v) {
+                    for (size_t pu = 0; pu < sw_u->nbPorts; pu++)
+                    {
+                        if ((int)sw_u->ports[pu].connectedEquipementIndex == v)
+                        {
                             sw_u->ports[pu].typePort = DESIGNATED;
                             break;
                         }
@@ -674,8 +692,10 @@ void dijkstra(Graphe const *g, size_t root, Arete *aretes, double *distance_somm
 
                     // Port sur v vers u
                     Switch *sw_v = &g->equipements[v].sw;
-                    for (size_t pv = 0; pv < sw_v->nbPorts; pv++) {
-                        if ((int)sw_v->ports[pv].connectedEquipementIndex == u) {
+                    for (size_t pv = 0; pv < sw_v->nbPorts; pv++)
+                    {
+                        if ((int)sw_v->ports[pv].connectedEquipementIndex == u)
+                        {
                             sw_v->ports[pv].typePort = DESIGNATED;
                             break;
                         }
@@ -685,12 +705,16 @@ void dijkstra(Graphe const *g, size_t root, Arete *aretes, double *distance_somm
         }
     }
 
-    for (size_t i = 0; i < (size_t)n; i++) {
-        if (i != root && predecesseur[i] != -1) {
+    for (size_t i = 0; i < (size_t)n; i++)
+    {
+        if (i != root && predecesseur[i] != -1)
+        {
             size_t pred = predecesseur[i];
             Switch *sw2 = &g->equipements[i].sw;
-            for (size_t l = 0; l < sw2->nbPorts; l++) {
-                if (sw2->ports[l].connectedEquipementIndex == pred) {
+            for (size_t l = 0; l < sw2->nbPorts; l++)
+            {
+                if (sw2->ports[l].connectedEquipementIndex == pred)
+                {
                     sw2->ports[l].typePort = ROOT;
                     break;
                 }
@@ -701,36 +725,43 @@ void dijkstra(Graphe const *g, size_t root, Arete *aretes, double *distance_somm
     free(fixe);
 }
 
-void afficherEtatPorts(Graphe g) {
+void afficherEtatPorts(Graphe g)
+{
     printf("\n===== État des ports des switches =====\n");
 
-    for (size_t i = 0; i < g.nb_equipements; i++) {
+    for (size_t i = 0; i < g.nb_equipements; i++)
+    {
         if (g.equipements[i].type != SWITCH_TYPE)
             continue;
 
         Switch sw = g.equipements[i].sw;
         printf("🔌 Switch %zu (MAC: %s)\n", i, obtenirMACString(sw.mac));
 
-        for (size_t j = 0; j < sw.nbPorts; j++) {
+        for (size_t j = 0; j < sw.nbPorts; j++)
+        {
             int connectedIndex = sw.ports[j].connectedEquipementIndex;
             const char *typeStr;
 
-            switch (sw.ports[j].typePort) {
-                case DESIGNATED:
-                    typeStr = "DESIGNATED";
-                    break;
-                case ROOT:
-                    typeStr = "ROOT";
-                    break;
-                case NON_DESIGNATED:
-                default:
-                    typeStr = "NON_DESIGNATED";
-                    break;
+            switch (sw.ports[j].typePort)
+            {
+            case DESIGNATED:
+                typeStr = "DESIGNATED";
+                break;
+            case ROOT:
+                typeStr = "ROOT";
+                break;
+            case NON_DESIGNATED:
+            default:
+                typeStr = "NON_DESIGNATED";
+                break;
             }
 
-            if (connectedIndex == -1) {
+            if (connectedIndex == -1)
+            {
                 printf("  ➤ Port %zu : déconnecté (%s)\n", j, typeStr);
-            } else {
+            }
+            else
+            {
                 printf("  ➤ Port %zu : connecté à équipement %d (%s)\n", j, connectedIndex, typeStr);
             }
         }
