@@ -167,5 +167,6 @@ void dijkstra(Graphe const *g, size_t root, Arete *aretes, double *distance_somm
 double poids_entre(Graphe const *g, int u, int v, Arete aretes);
 bool existe_arete(Graphe const *g, Arete a);
 size_t sommets_adjacents(Graphe const *g, size_t s, size_t sa[]);
+void afficherEtatPorts(Graphe g);
 
 #endif

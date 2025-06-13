@@ -15,15 +15,8 @@ int main(int argc, char *argv[])
     // printf("%lu\n", convertMacToInteger("54:d6:a6:82:c5:23"));
     if (creeReseau(argv[1], &g) == 0)
     {
-        printf("Taper 1 pour activer le protocole STP, 0 sinon : ");
-
-        size_t reponse;
-        scanf("%zu", &reponse);
-
-        if (reponse == 1) 
-        {
-            lancerDijkstra(&g);
-        }
+        lancerDijkstra(&g);
+        afficherEtatPorts(g);
         communiquer(&g);
         afficherReseau(&g);
     }

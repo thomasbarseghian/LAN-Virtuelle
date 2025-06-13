@@ -172,7 +172,7 @@ int verifyIp(char *ip)
         partie = strtok(NULL, ".");
     }
     if (i < 3)
-        return EXIT_FAILURE; // IP n'est pas bonne
+        return EXIT_FAILURE; // IP n'est pas bon
     return EXIT_SUCCESS;
 }
 
