@@ -302,6 +302,9 @@ void remplirTablePort(Graphe *g)
                 //        obtenirMACString(g->equipements[g->aretes[j].index_e2].station.mac));
                 sw->ports[k].connectedEquipementIndex = g->aretes[j].index_e2;
                 sw->ports[k].portId = k;
+                if(g->equipements[sw->ports[k].connectedEquipementIndex].type==STATION_TYPE){
+                   sw->ports[k].typePort = DESIGNATED;
+                }
                 k++;
             }
             else if (g->aretes[j].index_e2 == i)
@@ -690,4 +693,5 @@ void dijkstra(Graphe const *g, size_t root, Arete *aretes, double *distance_somm
     }
 
     free(fixe);
+
 }
