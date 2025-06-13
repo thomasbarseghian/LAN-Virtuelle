@@ -82,7 +82,7 @@ typedef struct
     };
 } Equipement;
 
-// Arete entre l'es quipements
+// Arete entre les quipements
 typedef struct
 {
     size_t index_e1;
@@ -111,7 +111,7 @@ typedef struct
     uint32_t FCS;
 } EthernetTram;
 
-// Function declarations
+// Fonction de declarations
 void afficherIP(AdresseIP ip);
 void afficherMacHexa(uint64_t mac);
 char *obtenirMACString(uint64_t mac);
