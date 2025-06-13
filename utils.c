@@ -350,7 +350,8 @@ int menuInteractif(char **menu, int nbOptions, int dejaSelectionner)
         // \033[H → place le curseur à la position (1,1)
         // \033[J → efface l'écran à partir de la position du curseur
         // Utilisé pour redessiner proprement le menu à chaque boucle
-        printf("\033[H\033[J");
+        // printf("\033[H\033[J");
+        printf("\n\n\n");
         printf("== Menu ==\n\n");
         if (dejaSelectionner > -1)
             printf("À qui vous voulez envoyer\n");
@@ -535,9 +536,10 @@ void afficherReseau(const Graphe *reseau)
     printf("===========================\n");
 }
 
-//Pour Dijkstra
+// Pour Dijkstra
 
-uint64_t genererBID(uint16_t priorite, uint64_t mac) {
+uint64_t genererBID(uint16_t priorite, uint64_t mac)
+{
     return ((uint64_t)priorite << 48) | (mac & 0xFFFFFFFFFFFF);
 }
 
@@ -549,9 +551,11 @@ size_t sommets_adjacents(Graphe const *g, size_t s, size_t sa[])
     // (le tableau sa est supposé assez grand pour contenir les sommets adjacents de s)
     int res = 0;
     size_t nbSwitches = nbSwitchReseaux(*g);
-    for(size_t i=0;i<nbSwitches;i++){
-        if(existe_arete(g,(Arete){s,i,0})){
-            sa[res]=i;
+    for (size_t i = 0; i < nbSwitches; i++)
+    {
+        if (existe_arete(g, (Arete){s, i, 0}))
+        {
+            sa[res] = i;
             res++;
         }
     }
@@ -561,8 +565,10 @@ bool existe_arete(Graphe const *g, Arete a)
 {
     // retourne true si l'arête a est contenue dans le graphe g, false sinon
     // /!\ l'arête (s1,s2) et l'arête (s2,s1) sont considérées équivalentes
-    for(size_t i=0;i<g->nb_aretes;i++){
-        if((g->aretes[i].index_e1==a.index_e1&&g->aretes[i].index_e2==a.index_e2)||(g->aretes[i].index_e2==a.index_e1&&g->aretes[i].index_e1==a.index_e2)){
+    for (size_t i = 0; i < g->nb_aretes; i++)
+    {
+        if ((g->aretes[i].index_e1 == a.index_e1 && g->aretes[i].index_e2 == a.index_e2) || (g->aretes[i].index_e2 == a.index_e1 && g->aretes[i].index_e1 == a.index_e2))
+        {
             return true;
         }
     }
