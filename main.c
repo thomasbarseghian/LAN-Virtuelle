@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
     if (creeReseau(argv[1], &g) == 0)
     {
         lancerDijkstra(&g);
-        afficherEtatPorts(g);
         communiquer(&g);
+        afficherEtatPorts(g);
         afficherReseau(&g);
     }
     else

@@ -350,8 +350,8 @@ int menuInteractif(char **menu, int nbOptions, int dejaSelectionner)
         // \033[H → place le curseur à la position (1,1)
         // \033[J → efface l'écran à partir de la position du curseur
         // Utilisé pour redessiner proprement le menu à chaque boucle
-        // printf("\033[H\033[J");
-        printf("\n\n\n");
+        printf("\033[H\033[J");
+        // printf("\n\n\n");
         printf("== Menu ==\n\n");
         if (dejaSelectionner > -1)
             printf("À qui vous voulez envoyer\n");
