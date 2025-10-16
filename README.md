@@ -3,11 +3,7 @@
 
 <p align="center">
   <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/9a659621-899e-4a2f-b522-3589466f649b" />
-
 </p>
-
-<p align="center"><sub>Illustration : Designed by <a href="https://www.freepik.com/author/macrovector">macrovector</a> / <a href="https://www.freepik.com/">Freepik</a></sub></p>
-
 
 ## Description  
 Ce projet a pour objectif de simuler le fonctionnement d’un **réseau local (LAN)** en langage C, en reproduisant les interactions entre **stations** et **commutateurs (switchs)**.  
