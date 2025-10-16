@@ -2,7 +2,8 @@
 **Projet tutoré – 1ʳᵉ année de BUT Informatique**
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/7d16e94a-de34-4da2-ac8b-6fe92e2d71ee" alt="Illustration du projet" width="400">
+  <img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/9a659621-899e-4a2f-b522-3589466f649b" />
+
 </p>
 
 <p align="center"><sub>Illustration : Designed by <a href="https://www.freepik.com/author/macrovector">macrovector</a> / <a href="https://www.freepik.com/">Freepik</a></sub></p>
@@ -62,6 +63,54 @@ Exemple de fichier `mylan.lan.txt` :
 ### 4. Exécuter le programme  
 ```bash
 ./main mylan.lan.txt
+
+== Menu ==
+
+Quelle machine veut envoyer
+>  Station MAC : 54:D6:A6:82:C5:01
+Station MAC : 54:D6:A6:82:C5:02
+Station MAC : 54:D6:A6:82:C5:03
+Station MAC : 54:D6:A6:82:C5:04
+Station MAC : 54:D6:A6:82:C5:05
+Station MAC : 54:D6:A6:82:C5:06
+Station MAC : 54:D6:A6:82:C5:07
+Station MAC : 54:D6:A6:82:C5:08
+
+À qui vous voulez envoyer
+Station MAC : 54:D6:A6:82:C5:02
+Station MAC : 54:D6:A6:82:C5:03
+Station MAC : 54:D6:A6:82:C5:04
+Station MAC : 54:D6:A6:82:C5:05
+Station MAC : 54:D6:A6:82:C5:06
+Station MAC : 54:D6:A6:82:C5:07
+>  Station MAC : 54:D6:A6:82:C5:08
+Switch learned MAC 54:D6:A6:82:C5:01 on port 3
+
+Envoi d'une trame de 54:D6:A6:82:C5:01 à 54:D6:A6:82:C5:01
+Switch 1 (MAC 01:45:23:A6:F7:02) inspecte la trame...
+Switch 0 (MAC 01:45:23:A6:F7:01) inspecte la trame...
+Switch learned MAC 54:D6:A6:82:C5:01 on port 0
+Switch 2 (MAC 01:45:23:A6:F7:03) inspecte la trame...
+Switch learned MAC 54:D6:A6:82:C5:01 on port 0
+Switch 6 (MAC 01:45:23:A6:F7:07) inspecte la trame...
+Switch learned MAC 54:D6:A6:82:C5:01 on port 0
+
+Machine (MAC: 54d6a682c508) a REÇU la trame !
+Trame reçue :
+   De     : 54d6a682c501
+   Vers   : 54d6a682c508
+   Données: Bonjour
+
+Machine (MAC: 54d6a682c508) envoie une ACK à 54d6a682c501
+Switch learned MAC 54:D6:A6:82:C5:08 on port 1
+
+Envoi d'une trame de 54:D6:A6:82:C5:08 à 54:D6:A6:82:C5:08
+Switch 6 (MAC 01:45:23:A6:F7:07) inspecte la trame...
+Switch 2 (MAC 01:45:23:A6:F7:03) inspecte la trame...
+Switch 0 (MAC 01:45:23:A6:F7:01) inspecte la trame...
+Switch 1 (MAC 01:45:23:A6:F7:02) inspecte la trame...
+
+ACK reçue par 54:D6:A6:82:C5:01 de la part de 54:D6:A6:82:C5:01 : ACK: Message reçu
 ```
 
 ---
