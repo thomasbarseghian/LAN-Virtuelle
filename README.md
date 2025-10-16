@@ -2,7 +2,7 @@
 **Projet tutoré – 1ʳᵉ année de BUT Informatique**
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/7d16e94a-de34-4da2-ac8b-6fe92e2d71ee" alt="Illustration du projet" width="800">
+  <img src="https://github.com/user-attachments/assets/7d16e94a-de34-4da2-ac8b-6fe92e2d71ee" alt="Illustration du projet" width="400">
 </p>
 
 <p align="center"><sub>Illustration : Designed by <a href="https://www.freepik.com/author/macrovector">macrovector</a> / <a href="https://www.freepik.com/">Freepik</a></sub></p>
