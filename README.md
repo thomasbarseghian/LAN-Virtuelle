@@ -151,6 +151,5 @@ Projet réalisé dans le cadre du **BUT Informatique**
 
 ---
 
-## Licence  
-Projet académique – usage pédagogique uniquement.  
-Toute réutilisation à des fins éducatives est autorisée avec mention de la source.  
+## Licence
+Projet sous licence MIT — voir le fichier LICENSE pour plus d’informations.
